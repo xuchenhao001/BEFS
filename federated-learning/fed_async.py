@@ -7,7 +7,7 @@ import threading
 from flask import Flask, request
 
 import utils.util
-from utils.CountStore import NextRoundCount, ShutdownCount
+from utils.CentralStore import NextRoundCount, ShutdownCount
 from utils.ModelStore import AsyncModelStore
 from utils.Train import Train
 from utils.util import ColoredLogger

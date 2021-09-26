@@ -7,7 +7,7 @@ from flask import Flask, request
 
 import utils.util
 from utils.ModelStore import ModelStore
-from utils.CountStore import NextRoundCount, ShutdownCount
+from utils.CentralStore import NextRoundCount, ShutdownCount
 from utils.util import ColoredLogger
 from models.Fed import FedAvg
 
@@ -128,16 +128,13 @@ def train():
 
 # STEP #3
 def train_count(w_compressed):
-    model_store.local_models_count_add()
     # append newly arrived w_local (decompressed) into g_train_local_models list for further aggregation
     model_store.local_models_add(utils.util.decompress_tensor(w_compressed))
     if model_store.local_models_count_num == trainer.args.num_users:
         logger.debug("Gathered enough train_ready, aggregate global model and send the download link.")
         # aggregate global model
         w_glob = FedAvg(model_store.local_models)
-        # reset counts
-        model_store.local_models_count_reset()
-        # release g_train_local_models after aggregation
+        # reset local models after aggregation
         model_store.local_models_reset()
         # save global model for further download
         model_store.update_global_model(w_glob, trainer.epoch)
@@ -176,7 +173,7 @@ def round_finish():
     trainer.load_model(w_glob)
     trainer.evaluate_model_with_log(record_communication_time=True)
 
-    # epochs count backwards until 0
+    # epochs count down to 0
     trainer.epoch -= 1
     if trainer.epoch > 0:
         body_data = {

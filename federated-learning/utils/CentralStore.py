@@ -41,3 +41,27 @@ class ShutdownCount:
         self.shutdown_count_num = 0
         lock.release()
         logger.debug("Reset shutdown_count_num, now: {}".format(self.shutdown_count_num))
+
+
+class IPCount:
+    def __init__(self):
+        self.ipMap = {}
+        self.uuid = 0
+
+    def get_new_id(self):
+        lock.acquire()
+        self.uuid += 1
+        new_id = self.uuid
+        lock.release()
+        return new_id
+
+    def get_keys(self):
+        return self.ipMap.keys()
+
+    def get(self, key):
+        return self.ipMap[key]
+
+    def set(self, key, value):
+        lock.acquire()
+        self.ipMap[key] = value
+        lock.release()
