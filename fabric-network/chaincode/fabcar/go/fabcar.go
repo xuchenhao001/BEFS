@@ -12,7 +12,7 @@ import (
 )
 
 const url = "http://172.17.0.1:8888/messages"
-var myuuid string
+var myuuid int
 var userNum int
 
 type SmartContract struct {
@@ -22,7 +22,7 @@ type SmartContract struct {
 type HttpMessage struct {
 	Message string `json:"message"`
 	Data interface{} `json:"data"`
-	Uuid string `json:"uuid"`
+	Uuid int `json:"uuid"`
 	Epochs int `json:"epochs"`
 	IsSync bool `json:"is_sync"`
 }
@@ -31,8 +31,24 @@ func (s *SmartContract) InitLedger(ctx contractapi.TransactionContextInterface) 
 	// generate a new uuid for each user
 	var localMSPID string = os.Getenv("CORE_PEER_LOCALMSPID")
 	println("LOCALMSPID: " + localMSPID)
-	myuuid = strings.Trim(localMSPID, "OrgMSP")
-	println("Init finished. My uuid: " + myuuid)
+	uuid := strings.Trim(localMSPID, "OrgMSP")
+	println("Init finished. My uuid: " + uuid)
+	myuuid, _ = strconv.Atoi(uuid)
+	return nil
+}
+
+// FetchID Fetch uuid from chaincode
+func (s *SmartContract) FetchID(ctx contractapi.TransactionContextInterface, receiveMsg string) error {
+	fmt.Println("[FETCHID MSG] Received")
+
+	sendMsg := new(HttpMessage)
+
+	sendMsg.Uuid = myuuid
+	sendMsg.Message = "uuid"
+	sendMsgAsBytes, _ := json.Marshal(sendMsg)
+
+	go sendPostRequest(sendMsgAsBytes, "UUID")
+
 	return nil
 }
 
@@ -57,7 +73,7 @@ func (s *SmartContract) Start(ctx contractapi.TransactionContextInterface, recei
 	userNum = int(dataMap["user_number"].(float64))
 	fmt.Println("Successfully loaded user number: ", userNum)
 	// store initial global model hash into the ledger
-	err = saveAsMap(ctx, "modelMap", recMsg.Epochs, "", recMsg.Data)
+	err = saveAsMap(ctx, "modelMap", recMsg.Epochs, -1, recMsg.Data)
 	if err != nil {
 		return fmt.Errorf("failed to save model hash into state. %s", err.Error())
 	}
@@ -145,12 +161,13 @@ func (s *SmartContract) ShutdownPython(ctx contractapi.TransactionContextInterfa
 	return nil
 }
 
-func saveAsMap(ctx contractapi.TransactionContextInterface, keyType string, epochs int, myUUID string,
+func saveAsMap(ctx contractapi.TransactionContextInterface, keyType string, epochs int, myUUID int,
 	value interface{}) error {
 	epochsString := strconv.Itoa(epochs)
-	fmt.Println("save [" + keyType + "] map to DB in epoch [" + epochsString  + "] for uuid: [" + myUUID + "]")
+	UUID := strconv.Itoa(myUUID)
+	fmt.Println("save [" + keyType + "] map to DB in epoch [" + epochsString  + "] for uuid: [" + UUID + "]")
 
-	key, err := ctx.GetStub().CreateCompositeKey(keyType, []string{epochsString, myUUID})
+	key, err := ctx.GetStub().CreateCompositeKey(keyType, []string{epochsString, UUID})
 	if err !=nil {
 		return fmt.Errorf("failed to composite key: %s", err.Error())
 	}
