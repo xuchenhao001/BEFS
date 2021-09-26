@@ -303,6 +303,13 @@ def generate_md5_hash(model_weights):
     return data_md5
 
 
+def extract_sign(w_local, w_glob):
+    w_signed = copy.deepcopy(w_local)
+    for k in w_signed.keys():
+        w_signed[k] = torch.sign(torch.sub(w_signed[k], w_glob[k]))
+    return w_signed
+
+
 def disturb_w(w):
     disturbed_w = copy.deepcopy(w)
     for name, param in w.items():

@@ -11,6 +11,7 @@ def args_parser():
     parser.add_argument('--local_bs', type=int, default=10, help="local batch size: B")
     parser.add_argument('--bs', type=int, default=128, help="test batch size")
     parser.add_argument('--lr', type=float, default=0.01, help="learning rate")
+    parser.add_argument('--server_lr', type=float, default=0.01, help="server learning rate")
     parser.add_argument('--momentum', type=float, default=0.5, help="SGD momentum (default: 0.5)")
     parser.add_argument('--split', type=str, default='user', help="train-test split type, user or sample")
 
@@ -46,7 +47,7 @@ def args_parser():
     # ip address that is used to test local IP
     parser.add_argument('--test_ip_addr', type=str, default="10.150.187.13", help="ip address used to test local IP")
     # sleep for several seconds before start train
-    parser.add_argument('--start_sleep', type=int, default=300, help="sleep for seconds before start train")
+    parser.add_argument('--start_sleep', type=int, default=30, help="sleep for seconds before start train")
     # sleep for several seconds before exit python
     parser.add_argument('--exit_sleep', type=int, default=300, help="sleep for seconds before exit python")
     # poisoning attacker ids, must be string type "1", "2", ... . "-1" means no poisoning attack
