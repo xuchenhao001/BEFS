@@ -53,7 +53,6 @@ def init():
 
     # finally trained the initial local model, which will be treated as first global model.
     trainer.net_glob.train()
-    # generate md5 hash from model, which is treated as global model of previous round.
     w = trainer.net_glob.state_dict()
     model_store.update_global_model(w, -1)  # -1 means the initial global model
 
@@ -97,10 +96,8 @@ def train():
         detail = trainer.post_msg_trigger(body_data)
         global_model_compressed = detail.get("global_model")
         w_glob = utils.util.decompress_tensor(global_model_compressed)
-        w_glob_hash = utils.util.generate_md5_hash(w_glob)
-        logger.debug('Downloaded initial global model hash: ' + w_glob_hash)
         trainer.load_model(w_glob)
-        trainer.evaluate_model(record_epoch=0, clean=True)
+        trainer.evaluate_model_with_log(record_epoch=0, clean=True)
 
     train_start_time = time.time()
     w_local = trainer.train()
@@ -177,7 +174,7 @@ def round_finish():
 
     # finally, evaluate the global model
     trainer.load_model(w_glob)
-    trainer.evaluate_model()
+    trainer.evaluate_model_with_log(record_communication_time=True)
 
     # epochs count backwards until 0
     trainer.epoch -= 1
@@ -224,7 +221,7 @@ def shutdown_count():
 
 
 def download_global_model(epochs):
-    if epochs == model_store.global_model_epoch:
+    if epochs == model_store.global_model_version:
         detail = {
             "global_model": model_store.global_model_compressed,
         }
@@ -255,7 +252,7 @@ def my_route(app):
             message = data.get("message")
             if message == "uuid":
                 trainer.uuid = int(data.get("uuid"))
-            if message == "prepare":
+            elif message == "prepare":
                 threading.Thread(target=train).start()
             elif message == "global_model_update":
                 threading.Thread(target=round_finish).start()

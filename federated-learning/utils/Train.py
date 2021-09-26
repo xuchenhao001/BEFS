@@ -59,15 +59,20 @@ class Train:
     def load_model(self, w):
         self.net_glob.load_state_dict(w)
 
-    def evaluate_model(self, record_epoch=None, clean=False):
-        communication_duration = 0
-        if record_epoch is None:
-            record_epoch = self.epoch
-            communication_duration = reset_communication_time()
+    def evaluate_model(self):
         self.net_glob.eval()
-        test_start_time = time.time()
         acc_local, acc_local_skew1, acc_local_skew2, acc_local_skew3, acc_local_skew4 = \
             test_model(self.net_glob, self.dataset_test, self.args, self.test_users, self.skew_users, self.uuid - 1)
+        return acc_local, acc_local_skew1, acc_local_skew2, acc_local_skew3, acc_local_skew4
+
+    def evaluate_model_with_log(self, record_epoch=None, clean=False, record_communication_time=False):
+        if record_epoch is None:
+            record_epoch = self.epoch
+        communication_duration = 0
+        if record_communication_time:
+            communication_duration = reset_communication_time()
+        test_start_time = time.time()
+        acc_local, acc_local_skew1, acc_local_skew2, acc_local_skew3, acc_local_skew4 = self.evaluate_model()
         test_duration = time.time() - test_start_time
         total_duration = time.time() - self.init_time
         round_duration = time.time() - self.round_start_time
@@ -76,6 +81,7 @@ class Train:
                    [total_duration, round_duration, train_duration, test_duration, communication_duration],
                    [acc_local, acc_local_skew1, acc_local_skew2, acc_local_skew3, acc_local_skew4],
                    self.args.model, clean=clean)
+        return acc_local, acc_local_skew1, acc_local_skew2, acc_local_skew3, acc_local_skew4
 
     def post_msg_blockchain(self, body_data):
         http_client_post(self.blockchain_server_url, body_data)
