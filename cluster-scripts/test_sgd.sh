@@ -26,7 +26,7 @@ function main() {
               PYTHON_CMD="python3 -u ${scheme_name}.py --model=${model} --dataset=${dataset} --sign_sgd"
               ssh ${HOST_USER}@${peer_addr} "(cd $PWD/../federated-learning/; $PYTHON_CMD) > $PWD/../server_${peer_addr[0]}.log 2>&1 &"
             done
-            sleep 30
+            sleep 300
             curl -i -X GET 'http://localhost:8888/messages'
             # detect test finish or not
             testFinish "${scheme_name}"
@@ -47,7 +47,7 @@ function main() {
               PYTHON_CMD="python3 -u ${scheme_name}.py --model=${model} --dataset=${dataset}"
               ssh ${HOST_USER}@${peer_addr} "(cd $PWD/../federated-learning/; $PYTHON_CMD) > $PWD/../server_${peer_addr[0]}.log 2>&1 &"
             done
-            sleep 30
+            sleep 300
             curl -i -X GET 'http://localhost:8888/messages'
             # detect test finish or not
             testFinish "${scheme_name}"
@@ -68,7 +68,7 @@ function main() {
               PYTHON_CMD="python3 -u ${scheme_name}.py --model=${model} --dataset=${dataset}"
               ssh ${HOST_USER}@${peer_addr} "(cd $PWD/../federated-learning/; $PYTHON_CMD) > $PWD/../server_${peer_addr[0]}.log 2>&1 &"
             done
-            sleep 30
+            sleep 300
             curl -i -X GET 'http://localhost:8888/messages'
             # detect test finish or not
             testFinish "${scheme_name}"
