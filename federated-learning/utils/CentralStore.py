@@ -58,10 +58,10 @@ class IPCount:
     def get_keys(self):
         return self.ipMap.keys()
 
-    def get(self, key):
+    def get_map(self, key):
         return self.ipMap[key]
 
-    def set(self, key, value):
+    def set_map(self, key, value):
         lock.acquire()
         self.ipMap[key] = value
         lock.release()

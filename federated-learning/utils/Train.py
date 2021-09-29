@@ -77,6 +77,8 @@ class Train:
         communication_duration = 0
         if record_communication_time:
             communication_duration = reset_communication_time()
+        if communication_duration < 0.001:
+            communication_duration = 0.0
         test_start_time = time.time()
         acc_local, acc_local_skew1, acc_local_skew2, acc_local_skew3, acc_local_skew4 = self.evaluate_model()
         test_duration = time.time() - test_start_time
@@ -111,3 +113,9 @@ class Train:
             logger.debug("As a poisoning attacker ({}), manipulate local gradients!".format(self.args.attackers))
             w_local = disturb_w(w_local)
         return w_local
+
+
+class APFLTrain(Train):
+    def __init__(self):
+        super().__init__()
+        self.hyper_para = 0

@@ -14,7 +14,7 @@ from utils.util import ColoredLogger
 from models.Fed import FadeFedAvg
 
 logging.setLoggerClass(ColoredLogger)
-logging.getLogger('werkzeug').setLevel(logging.ERROR)
+logging.getLogger("werkzeug").setLevel(logging.ERROR)
 logger = logging.getLogger("fed_async")
 
 # TO BE CHANGED
@@ -32,7 +32,7 @@ def init():
     # parse network.config and read the peer addresses
     real_path = os.path.dirname(os.path.realpath(__file__))
     peer_address_list = utils.util.env_from_sourcing(os.path.join(real_path, "../fabric-network/network.config"),
-                                                     "PeerAddress").split(' ')
+                                                     "PeerAddress").split(" ")
     peer_header_addr = peer_address_list[0].split(":")[0]
     # initially the blockchain communicate server is load on the first peer
     trainer.blockchain_server_url = "http://" + peer_header_addr + ":3000/invoke/mychannel/fabcar"
@@ -61,35 +61,35 @@ def init():
 def start():
     # get uuid for itself
     body_data = {
-        'message': 'FetchID',
-        'data': {},
-        'epochs': 0,
-        'is_sync': False
+        "message": "FetchID",
+        "data": {},
+        "epochs": 0,
+        "is_sync": False
     }
     trainer.post_msg_blockchain(body_data)
     # upload md5 hash to ledger
     body_data = {
-        'message': 'Start',
-        'data': {
-            'global_model_hash': model_store.global_model_hash,
-            'user_number': trainer.args.num_users,
+        "message": "Start",
+        "data": {
+            "global_model_hash": model_store.global_model_hash,
+            "user_number": trainer.args.num_users,
         },
-        'epochs': trainer.args.epochs,
-        'is_sync': False
+        "epochs": trainer.args.epochs,
+        "is_sync": False
     }
     trainer.post_msg_blockchain(body_data)
 
 
 # STEP #2
 def train():
-    logger.debug('Train local model for user: %s, epoch: %s.' % (trainer.uuid, trainer.epoch))
+    logger.debug("Train local model for user: {}, epoch: {}.".format(trainer.uuid, trainer.epoch))
 
     trainer.round_start_time = time.time()
     if trainer.is_first_epoch():
         trainer.init_time = time.time()
         # download initial global model
         body_data = {
-            'message': 'global_model',
+            "message": "global_model",
         }
         detail = trainer.post_msg_trigger(body_data)
         global_model_compressed = detail.get("global_model")
@@ -105,21 +105,21 @@ def train():
     # send local model to the first node for aggregation
     w_local_compressed = utils.util.compress_tensor(w_local)
     body_data = {
-        'message': 'train_ready',
-        'w_compressed': w_local_compressed
+        "message": "train_ready",
+        "w_compressed": w_local_compressed
     }
     trainer.post_msg_trigger(body_data)
 
     # send hash of local model to the ledger
     model_md5 = utils.util.generate_md5_hash(w_local)
     body_data = {
-        'message': 'UploadLocalModel',
-        'data': {
-            'w': model_md5,
+        "message": "UploadLocalModel",
+        "data": {
+            "w": model_md5,
         },
-        'uuid': trainer.uuid,
-        'epochs': trainer.epoch,
-        'is_sync': True
+        "uuid": trainer.uuid,
+        "epochs": trainer.epoch,
+        "is_sync": True
     }
     trainer.post_msg_blockchain(body_data)
 
@@ -153,13 +153,13 @@ def aggregate(w_compressed):
     logger.debug("As a committee leader, calculate new global model hash: " + model_store.global_model_hash)
     # send the download link and hash of global model to the ledger
     body_data = {
-        'message': 'UploadGlobalModel',
-        'data': {
-            'global_model_hash': model_store.global_model_hash,
+        "message": "UploadGlobalModel",
+        "data": {
+            "global_model_hash": model_store.global_model_hash,
         },
-        'uuid': trainer.uuid,
-        'epochs': trainer.epoch,
-        'is_sync': False
+        "uuid": trainer.uuid,
+        "epochs": trainer.epoch,
+        "is_sync": False
     }
     trainer.post_msg_blockchain(body_data)
 
@@ -179,7 +179,7 @@ def calculate_fade_c(w_local):
                 try:
                     fade_c = model_store.global_model_acc / acc_local
                 except ZeroDivisionError as err:
-                    logger.debug('Divided by zero: {}, set scaling factor to 10 by default.'.format(err))
+                    logger.debug("Divided by zero: {}, set scaling factor to 10 by default.".format(err))
                     fade_c = 10
         else:
             # for cnn or mlp models, accuracy the higher the better.
@@ -189,7 +189,7 @@ def calculate_fade_c(w_local):
                 try:
                     fade_c = acc_local / model_store.global_model_acc
                 except ZeroDivisionError as err:
-                    logger.debug('Divided by zero: {}, set scaling factor to 10 by default.'.format(err))
+                    logger.debug("Divided by zero: {}, set scaling factor to 10 by default.".format(err))
                     fade_c = 10
         # filter out poisoning local updated gradients whose test accuracy is less than acc_detect_threshold
         if fade_c < trainer.args.poisoning_detect_threshold:
@@ -198,22 +198,22 @@ def calculate_fade_c(w_local):
         logger.debug("fade={}, static fade setting is adopted!".format(trainer.args.fade))
         # static fade setting
         fade_c = trainer.args.fade
-    logger.debug("calculated fade_c: %f" % fade_c)
+    logger.debug("calculated fade_c: {}".format(fade_c))
     return fade_c
 
 
 # STEP #7
 def round_finish():
-    logger.debug('Download latest global model for user: %s, epoch: %s.' % (trainer.uuid, trainer.epoch))
+    logger.debug("Download latest global model for user: {}, epoch: {}.".format(trainer.uuid, trainer.epoch))
 
     # download global model
     body_data = {
-        'message': 'global_model',
+        "message": "global_model",
     }
     detail = trainer.post_msg_trigger(body_data)
     global_model_compressed = detail.get("global_model")
     global_model_version = detail.get("version")
-    logger.debug('Successfully fetched global model version: {}'.format(global_model_version))
+    logger.debug("Successfully fetched global model version: {}".format(global_model_version))
     w_glob = utils.util.decompress_tensor(global_model_compressed)
 
     # finally, evaluate the global model
@@ -228,7 +228,7 @@ def round_finish():
     else:
         logger.info("########## ALL DONE! ##########")
         body_data = {
-            'message': 'shutdown_python'
+            "message": "shutdown_python"
         }
         trainer.post_msg_trigger(body_data)
 
@@ -238,11 +238,11 @@ def shutdown_count():
     if shutdown.shutdown_count_num == trainer.args.num_users:
         # send request to blockchain for shutting down the python
         body_data = {
-            'message': 'ShutdownPython',
-            'data': {},
-            'uuid': "",
-            'epochs': 0,
-            'is_sync': False
+            "message": "ShutdownPython",
+            "data": {},
+            "uuid": "",
+            "epochs": 0,
+            "is_sync": False
         }
         trainer.post_msg_blockchain(body_data)
 
@@ -256,13 +256,13 @@ def download_global_model():
 
 
 def my_route(app):
-    @app.route('/messages', methods=['GET', 'POST'])
+    @app.route("/messages", methods=["GET", "POST"])
     def main_handler():
         # For GET
-        if request.method == 'GET':
+        if request.method == "GET":
             start()
             response = {
-                'status': 'yes'
+                "status": "yes"
             }
             return response
         # For POST
@@ -281,10 +281,10 @@ def my_route(app):
                 threading.Thread(target=utils.util.my_exit, args=(trainer.args.exit_sleep, )).start()
             return response
 
-    @app.route('/trigger', methods=['GET', 'POST'])
+    @app.route("/trigger", methods=["GET", "POST"])
     def trigger_handler():
         # For POST
-        if request.method == 'POST':
+        if request.method == "POST":
             data = request.get_json()
             status = "yes"
             detail = {}
@@ -298,10 +298,10 @@ def my_route(app):
             response = {"status": status, "detail": detail}
             return response
 
-    @app.route('/test', methods=['GET', 'POST'])
+    @app.route("/test", methods=["GET", "POST"])
     def test():
         # For GET
-        if request.method == 'GET':
+        if request.method == "GET":
             test_body = {
                 "test": "success"
             }
@@ -317,4 +317,4 @@ if __name__ == "__main__":
     flask_app = Flask(__name__)
     my_route(flask_app)
     logger.info("start serving at " + str(fed_listen_port) + "...")
-    flask_app.run(host='0.0.0.0', port=fed_listen_port)
+    flask_app.run(host="0.0.0.0", port=fed_listen_port)

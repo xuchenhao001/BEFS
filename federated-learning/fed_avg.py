@@ -13,7 +13,7 @@ from utils.util import ColoredLogger
 from models.Fed import FedAvg, signSGD
 
 logging.setLoggerClass(ColoredLogger)
-logging.getLogger('werkzeug').setLevel(logging.ERROR)
+logging.getLogger("werkzeug").setLevel(logging.ERROR)
 logger = logging.getLogger("fed_avg")
 
 # TO BE CHANGED
@@ -33,7 +33,7 @@ def init():
     # parse network.config and read the peer addresses
     real_path = os.path.dirname(os.path.realpath(__file__))
     peer_address_list = utils.util.env_from_sourcing(os.path.join(real_path, "../fabric-network/network.config"),
-                                                     "PeerAddress").split(' ')
+                                                     "PeerAddress").split(" ")
     peer_header_addr = peer_address_list[0].split(":")[0]
     # initially the blockchain communicate server is load on the first peer
     trainer.blockchain_server_url = "http://" + peer_header_addr + ":3000/invoke/mychannel/fabcar"
@@ -62,7 +62,7 @@ def init():
 def train():
     if trainer.uuid == -1:
         trainer.uuid = fetch_uuid()
-    logger.debug('Train local model for user: %s, epoch: %s.' % (trainer.uuid, trainer.epoch))
+    logger.debug("Train local model for user: {}, epoch: {}.".format(trainer.uuid, trainer.epoch))
 
     trainer.round_start_time = time.time()
     # calculate initial model accuracy, record it as the bench mark.
@@ -70,8 +70,8 @@ def train():
         trainer.init_time = time.time()
         # download initial global model
         body_data = {
-            'message': 'global_model',
-            'epochs': -1,
+            "message": "global_model",
+            "epochs": -1,
         }
         detail = trainer.post_msg_trigger(body_data)
         global_model_compressed = detail.get("global_model")
@@ -92,10 +92,10 @@ def train():
     w_local_compressed = utils.util.compress_tensor(w_local)
     from_ip = utils.util.get_ip(trainer.args.test_ip_addr)
     body_data = {
-        'message': 'upload_local_w',
-        'w_compressed': w_local_compressed,
-        'uuid': trainer.uuid,
-        'from_ip': from_ip,
+        "message": "upload_local_w",
+        "w_compressed": w_local_compressed,
+        "uuid": trainer.uuid,
+        "from_ip": from_ip,
     }
     trainer.post_msg_trigger(body_data)
 
@@ -106,7 +106,7 @@ def start_train():
 
 
 def gathered_global_w(w_glob_compressed):
-    logger.debug('Received latest global model for user: %s, epoch: %s.' % (trainer.uuid, trainer.epoch))
+    logger.debug("Received latest global model for user: {}, epoch: {}.".format(trainer.uuid, trainer.epoch))
 
     # load hash of new global model, which is downloaded from the leader
     w_glob = utils.util.decompress_tensor(w_glob_compressed)
@@ -123,15 +123,15 @@ def gathered_global_w(w_glob_compressed):
         logger.info("########## ALL DONE! ##########")
         from_ip = utils.util.get_ip(trainer.args.test_ip_addr)
         body_data = {
-            'message': 'shutdown_python',
-            'uuid': trainer.uuid,
-            'from_ip': from_ip,
+            "message": "shutdown_python",
+            "uuid": trainer.uuid,
+            "from_ip": from_ip,
         }
         trainer.post_msg_trigger(body_data)
 
 
 def average_local_w(uuid, from_ip, w_compressed):
-    ipCount.set(uuid, from_ip)
+    ipCount.set_map(uuid, from_ip)
     model_store.local_models_add(utils.util.decompress_tensor(w_compressed))
     if model_store.local_models_count_num == trainer.args.num_users:
         logger.debug("Gathered enough w, average and release them")
@@ -144,17 +144,17 @@ def average_local_w(uuid, from_ip, w_compressed):
         # save global model
         model_store.update_global_model(w_glob, trainer.epoch)
         for uuid in ipCount.get_keys():
-            data = {
+            body_data = {
                 "message": "release_global_w",
                 "w_compressed": model_store.global_model_compressed,
             }
-            my_url = "http://" + ipCount.get(uuid) + ":" + str(fed_listen_port) + "/trigger"
-            utils.util.http_client_post(my_url, data)
+            my_url = "http://" + ipCount.get_map(uuid) + ":" + str(fed_listen_port) + "/trigger"
+            utils.util.http_client_post(my_url, body_data)
 
 
 def fetch_uuid():
     body_data = {
-        'message': 'fetch_uuid',
+        "message": "fetch_uuid",
     }
     detail = trainer.post_msg_trigger(body_data)
     uuid = detail.get("uuid")
@@ -180,10 +180,10 @@ def load_global_model(epochs):
 
 
 def my_route(app):
-    @app.route('/trigger', methods=['GET', 'POST'])
+    @app.route("/trigger", methods=["GET", "POST"])
     def trigger_handler():
         # For POST
-        if request.method == 'POST':
+        if request.method == "POST":
             data = request.get_json()
             status = "yes"
             detail = {}
@@ -215,7 +215,7 @@ def main():
     flask_app = Flask(__name__)
     my_route(flask_app)
     logger.info("start serving at " + str(fed_listen_port) + "...")
-    flask_app.run(host='0.0.0.0', port=fed_listen_port)
+    flask_app.run(host="0.0.0.0", port=fed_listen_port)
 
 
 if __name__ == "__main__":

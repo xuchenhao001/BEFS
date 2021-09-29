@@ -25,7 +25,6 @@ def args_parser():
     parser.add_argument('--num_filters', type=int, default=32, help="number of filters for conv nets")
     parser.add_argument('--max_pool', type=str, default='True',
                         help="Whether use max pooling rather than strided convolutions")
-    parser.add_argument('--hyper', type=float, default=0.3, help='hypermeter alpha')
 
     # support dataset: "mnist", "fashion_mnist", "cifar", "uci", "realworld", "loop"
     parser.add_argument('--dataset', type=str, default='fashion_mnist', help="name of dataset")
@@ -39,6 +38,9 @@ def args_parser():
     parser.add_argument('--log_level', type=str, default='DEBUG', help='level of logs: DEBUG, INFO, WARNING, ERROR, '
                                                                        'or CRITICAL')
 
+    # for APFL
+    parser.add_argument('--apfl_hyper', type=float, default=0.3, help='APFL hypermeter alpha')
+
     # customized parameters
     parser.add_argument('--fade', type=float, default=-1, help="static fade coefficient, -1 means dynamic")
     # total dataset training size: MNIST: 60000, FASHION-MNIST:60000, CIFAR-10: 60000, UCI: 10929, REALWORLD: 285148,
@@ -47,7 +49,7 @@ def args_parser():
     # ip address that is used to test local IP
     parser.add_argument('--test_ip_addr', type=str, default="10.150.187.13", help="ip address used to test local IP")
     # sleep for several seconds before start train
-    parser.add_argument('--start_sleep', type=int, default=300, help="sleep for seconds before start train")
+    parser.add_argument('--start_sleep', type=int, default=30, help="sleep for seconds before start train")
     # sleep for several seconds before exit python
     parser.add_argument('--exit_sleep', type=int, default=300, help="sleep for seconds before exit python")
     # poisoning attacker ids, must be string type "1", "2", ... . "-1" means no poisoning attack

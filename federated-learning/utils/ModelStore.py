@@ -1,3 +1,4 @@
+import copy
 import logging
 import threading
 
@@ -58,3 +59,34 @@ class AsyncModelStore(ModelStore):
         self.global_model_version += 1
         lock.release()
 
+
+class APFLModelStore(ModelStore):
+    def __init__(self):
+        ModelStore.__init__(self)
+        # for apfl
+        self.difference1 = None
+        self.difference2 = None
+        self.w_glob = None
+        self.w_glob_local = None
+        self.w_glob_local_compressed = None
+        self.w_locals = None
+        self.w_locals_per = None
+
+    def update_w_glob(self, w_glob):
+        self.w_glob = copy.deepcopy(w_glob)
+
+    def update_w_glob_local(self, w_glob_local):
+        self.w_glob_local = copy.deepcopy(w_glob_local)
+        self.w_glob_local_compressed = compress_tensor(w_glob_local)
+
+    def update_w_locals(self, w_locals):
+        self.w_locals = copy.deepcopy(w_locals)
+
+    def update_w_locals_per(self, w_locals_per):
+        self.w_locals_per = copy.deepcopy(w_locals_per)
+
+    def update_difference1(self, difference1):
+        self.difference1 = copy.deepcopy(difference1)
+
+    def update_difference2(self, difference2):
+        self.difference2 = copy.deepcopy(difference2)
