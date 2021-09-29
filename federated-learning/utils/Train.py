@@ -1,5 +1,6 @@
 import copy
 import logging
+import os
 import time
 
 import torch
@@ -7,7 +8,7 @@ import torch
 from models.Update import local_update
 from utils.options import args_parser
 from utils.util import dataset_loader, model_loader, ColoredLogger, http_client_post, test_model, record_log, \
-    reset_communication_time, disturb_w
+    reset_communication_time, disturb_w, env_from_sourcing
 
 logging.setLoggerClass(ColoredLogger)
 logger = logging.getLogger("Train")
@@ -17,6 +18,7 @@ class Train:
     def __init__(self):
         self.blockchain_server_url = ""
         self.trigger_url = ""
+        self.peer_address_list = []
         self.args = None
         self.net_glob = None
         self.dataset_train = None
@@ -30,20 +32,30 @@ class Train:
         self.epoch = -1
         self.uuid = -1
 
-    def parse_args(self, num_users=None):
+    def parse_args(self):
         self.args = args_parser()
         self.args.device = torch.device(
             'cuda:{}'.format(self.args.gpu) if torch.cuda.is_available() and self.args.gpu != -1 else 'cpu')
         self.epoch = self.args.epochs
-        # if read num_users from blockchain
-        if num_users:
-            self.args.num_users = num_users
+        # read num_users from blockchain
+        self.args.num_users = len(self.peer_address_list)
         arguments = vars(self.args)
         logger.info("==========================================")
         for k, v in arguments.items():
             arg = "{}: {}".format(k, v)
             logger.info("* {0:<40}".format(arg))
         logger.info("==========================================")
+
+    def init_urls(self, fed_listen_port):
+        # parse network.config and read the peer addresses
+        real_path = os.path.dirname(os.path.realpath(__file__))
+        self.peer_address_list = env_from_sourcing(os.path.join(real_path, "../../fabric-network/network.config"),
+                                                   "PEER_ADDRS").split(" ")
+        peer_header_addr = self.peer_address_list[0].split(":")[0]
+        # initially the blockchain communicate server is load on the first peer
+        self.blockchain_server_url = "http://" + peer_header_addr + ":3000/invoke/mychannel/fabcar"
+        # initially the trigger url is load on the first peer
+        self.trigger_url = "http://" + peer_header_addr + ":" + str(fed_listen_port) + "/trigger"
 
     def init_dataset(self):
         self.dataset_train, self.dataset_test, self.dict_users, self.test_users, self.skew_users = \
@@ -104,7 +116,7 @@ class Train:
 
     def train(self):
         w_local, _ = local_update(copy.deepcopy(self.net_glob).to(self.args.device), self.dataset_train,
-                                  self.dict_users[self.uuid-1], self.args)
+                                  self.dict_users[self.uuid - 1], self.args)
         return w_local
 
     def poisoning_attack(self, w_local):

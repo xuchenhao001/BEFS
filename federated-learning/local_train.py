@@ -28,18 +28,10 @@ ipCount = IPCount()
 
 # init: loads the dataset and global model
 def init():
-    # parse network.config and read the peer addresses
-    real_path = os.path.dirname(os.path.realpath(__file__))
-    peer_address_list = utils.util.env_from_sourcing(os.path.join(real_path, "../fabric-network/network.config"),
-                                                     "PeerAddress").split(" ")
-    peer_header_addr = peer_address_list[0].split(":")[0]
-    # initially the blockchain communicate server is load on the first peer
-    trainer.blockchain_server_url = "http://" + peer_header_addr + ":3000/invoke/mychannel/fabcar"
-    # initially the trigger url is load on the first peer
-    trainer.trigger_url = "http://" + peer_header_addr + ":" + str(fed_listen_port) + "/trigger"
+    trainer.init_urls(fed_listen_port)
 
     # parse args
-    trainer.parse_args(len(peer_address_list))
+    trainer.parse_args()
     logger.setLevel(trainer.args.log_level)
 
     load_result = trainer.init_dataset()

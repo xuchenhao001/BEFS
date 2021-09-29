@@ -61,10 +61,10 @@ function main() {
             # clean
             clean
             # run test
-            for i in "${!PeerAddress[@]}"; do
-              addrIN=(${PeerAddress[i]//:/ })
+            for i in "${!PEER_ADDRS[@]}"; do
+              addrIN=(${PEER_ADDRS[i]//:/ })
               dataset_train_size=${TrainDataSize[i]}
-              ./restart_core.sh ${HostUser} ${addrIN[0]} "fed_async" "$model" "$dataset" "$is_iid" "$dataset_train_size" "-1" "-1" "0.0" "-1" "0.9"
+              ./restart_core.sh ${HOST_USER} ${addrIN[0]} "fed_async" "$model" "$dataset" "$is_iid" "$dataset_train_size" "-1" "-1" "0.0" "-1" "0.9"
             done
             sleep 300
             curl -i -X GET 'http://localhost:8888/messages'
@@ -81,10 +81,10 @@ function main() {
             # clean
             clean
             # run test
-            for i in "${!PeerAddress[@]}"; do
-              addrIN=(${PeerAddress[i]//:/ })
+            for i in "${!PEER_ADDRS[@]}"; do
+              addrIN=(${PEER_ADDRS[i]//:/ })
               dataset_train_size=${TrainDataSize[i]}
-              ./restart_core.sh ${HostUser} ${addrIN[0]} "fed_async" "$model" "$dataset" "$is_iid" "$dataset_train_size" "-1" "-1" "0.0" "10" "0.8"
+              ./restart_core.sh ${HOST_USER} ${addrIN[0]} "fed_async" "$model" "$dataset" "$is_iid" "$dataset_train_size" "-1" "-1" "0.0" "10" "0.8"
             done
             sleep 300
             curl -i -X GET 'http://localhost:8888/messages'
@@ -101,10 +101,10 @@ function main() {
             # clean
             clean
             # run test
-            for i in "${!PeerAddress[@]}"; do
-              addrIN=(${PeerAddress[i]//:/ })
+            for i in "${!PEER_ADDRS[@]}"; do
+              addrIN=(${PEER_ADDRS[i]//:/ })
               dataset_train_size=${TrainDataSize[i]}
-              ./restart_core.sh ${HostUser} ${addrIN[0]} "fed_async" "$model" "$dataset" "$is_iid" "$dataset_train_size" "-1" "-1" "0.0" "10" "0.9"
+              ./restart_core.sh ${HOST_USER} ${addrIN[0]} "fed_async" "$model" "$dataset" "$is_iid" "$dataset_train_size" "-1" "-1" "0.0" "10" "0.9"
             done
             sleep 300
             curl -i -X GET 'http://localhost:8888/messages'
@@ -121,10 +121,10 @@ function main() {
             # clean
             clean
             # run test
-            for i in "${!PeerAddress[@]}"; do
-              addrIN=(${PeerAddress[i]//:/ })
+            for i in "${!PEER_ADDRS[@]}"; do
+              addrIN=(${PEER_ADDRS[i]//:/ })
               dataset_train_size=${TrainDataSize[i]}
-              ./restart_core.sh ${HostUser} ${addrIN[0]} "fed_async" "$model" "$dataset" "$is_iid" "$dataset_train_size" "1.0" "-1" "0.0" "-1" "0.9"
+              ./restart_core.sh ${HOST_USER} ${addrIN[0]} "fed_async" "$model" "$dataset" "$is_iid" "$dataset_train_size" "1.0" "-1" "0.0" "-1" "0.9"
             done
             sleep 300
             curl -i -X GET 'http://localhost:8888/messages'
@@ -141,10 +141,10 @@ function main() {
             # clean
             clean
             # run test
-            for i in "${!PeerAddress[@]}"; do
-              addrIN=(${PeerAddress[i]//:/ })
+            for i in "${!PEER_ADDRS[@]}"; do
+              addrIN=(${PEER_ADDRS[i]//:/ })
               dataset_train_size=${TrainDataSize[i]}
-              ./restart_core.sh ${HostUser} ${addrIN[0]} "fed_async" "$model" "$dataset" "$is_iid" "$dataset_train_size" "1.0" "-1" "0.0" "0" "0.8"
+              ./restart_core.sh ${HOST_USER} ${addrIN[0]} "fed_async" "$model" "$dataset" "$is_iid" "$dataset_train_size" "1.0" "-1" "0.0" "0" "0.8"
             done
             sleep 300
             curl -i -X GET 'http://localhost:8888/messages'
@@ -161,10 +161,10 @@ function main() {
             # clean
             clean
             # run test
-            for i in "${!PeerAddress[@]}"; do
-              addrIN=(${PeerAddress[i]//:/ })
+            for i in "${!PEER_ADDRS[@]}"; do
+              addrIN=(${PEER_ADDRS[i]//:/ })
               dataset_train_size=${TrainDataSize[i]}
-              ./restart_core.sh ${HostUser} ${addrIN[0]} "fed_async" "$model" "$dataset" "$is_iid" "$dataset_train_size" "1.0" "-1" "0.0" "0" "0.9"
+              ./restart_core.sh ${HOST_USER} ${addrIN[0]} "fed_async" "$model" "$dataset" "$is_iid" "$dataset_train_size" "1.0" "-1" "0.0" "0" "0.9"
             done
             sleep 300
             curl -i -X GET 'http://localhost:8888/messages'
@@ -177,6 +177,6 @@ function main() {
     done
 }
 
-main
+main > full-test.log 2>&1 &
 
 

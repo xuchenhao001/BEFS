@@ -120,12 +120,12 @@ function networkUp() {
     ./prepareCerts.sh
   fi
 
-  for i in "${!PeerAddress[@]}"; do
-    addrIN=(${PeerAddress[i]//:/ })
+  for i in "${!PEER_ADDRS[@]}"; do
+    addrIN=(${PEER_ADDRS[i]//:/ })
     # check ssh connection first
-    status=$(ssh -o BatchMode=yes -o ConnectTimeout=5 ${HostUser}@${addrIN[0]} echo ok 2>&1)
+    status=$(ssh -o BatchMode=yes -o ConnectTimeout=5 ${HOST_USER}@${addrIN[0]} echo ok 2>&1)
     if [[ $status != "ok" ]]; then
-        echo "Please add your public key to other hosts with user \"${HostUser}\" before release certs through command \"ssh-copy-id\"!"
+        echo "Please add your public key to other hosts with user \"${HOST_USER}\" before release certs through command \"ssh-copy-id\"!"
         exit 1
     fi
 
@@ -141,16 +141,16 @@ function networkUp() {
       COMPOSE_FILES="${COMPOSE_FILES} -f network-cache/orderer.yaml"
     fi
 
-    ssh ${HostUser}@${addrIN[0]} "cd ~/BEFS/fabric-network/ && ${COMPOSE_CMD} ${COMPOSE_FILES} up -d 2>&1"
+    ssh ${HOST_USER}@${addrIN[0]} "cd ~/BEFS/fabric-network/ && ${COMPOSE_CMD} ${COMPOSE_FILES} up -d 2>&1"
   done
 
 }
 
 function cleanLogs() {
   rm -f ~/BEFS/federated-learning/result-record_*.txt
-  for i in "${!PeerAddress[@]}"; do
-    addrIN=(${PeerAddress[i]//:/ })
-    ssh ${HostUser}@${addrIN[0]} "rm -f ~/BEFS/federated-learning/result-record_*.txt"
+  for i in "${!PEER_ADDRS[@]}"; do
+    addrIN=(${PEER_ADDRS[i]//:/ })
+    ssh ${HOST_USER}@${addrIN[0]} "rm -f ~/BEFS/federated-learning/result-record_*.txt"
   done
 }
 
@@ -191,17 +191,17 @@ function deployCC() {
 
 # Tear down running network
 function networkDown() {
-  for i in "${!PeerAddress[@]}"; do
-    addrIN=(${PeerAddress[i]//:/ })
+  for i in "${!PEER_ADDRS[@]}"; do
+    addrIN=(${PEER_ADDRS[i]//:/ })
     # check ssh connection first
-    status=$(ssh -o BatchMode=yes -o ConnectTimeout=5 ${HostUser}@${addrIN[0]} echo ok 2>&1)
+    status=$(ssh -o BatchMode=yes -o ConnectTimeout=5 ${HOST_USER}@${addrIN[0]} echo ok 2>&1)
     if [[ $status != "ok" ]]; then
-        echo "Please add your public key to other hosts with user \"${HostUser}\" before release certs through command \"ssh-copy-id\"!"
+        echo "Please add your public key to other hosts with user \"${HOST_USER}\" before release certs through command \"ssh-copy-id\"!"
         exit 1
     fi
 
     COMPOSE_FILES=""
-    COMPOSE_FILES_LIST=($(ssh ${HostUser}@${addrIN[0]} "ls -d ~/BEFS/fabric-network/network-cache/docker-compose*"))
+    COMPOSE_FILES_LIST=($(ssh ${HOST_USER}@${addrIN[0]} "ls -d ~/BEFS/fabric-network/network-cache/docker-compose*"))
     for j in "${!COMPOSE_FILES_LIST[@]}"; do
       COMPOSE_FILES="${COMPOSE_FILES} -f ${COMPOSE_FILES_LIST[j]}"
     done
@@ -210,7 +210,7 @@ function networkDown() {
       COMPOSE_FILES="${COMPOSE_FILES} -f network-cache/orderer.yaml"
     fi
 
-    ssh ${HostUser}@${addrIN[0]} "cd ~/BEFS/fabric-network/ && (${COMPOSE_CMD} ${COMPOSE_FILES} down --volumes --remove-orphans || true) && ./clearLocal.sh"
+    ssh ${HOST_USER}@${addrIN[0]} "cd ~/BEFS/fabric-network/ && (${COMPOSE_CMD} ${COMPOSE_FILES} down --volumes --remove-orphans || true) && ./clearLocal.sh"
   done
 }
 

@@ -9,7 +9,7 @@ import utils.util
 from utils.ModelStore import ModelStore
 from utils.CentralStore import NextRoundCount, ShutdownCount
 from utils.util import ColoredLogger
-from models.Fed import FedAvg
+from models.Fed import FedAvg, signSGD
 
 from utils.Train import Train
 
@@ -29,18 +29,10 @@ shutdown = ShutdownCount()
 
 # STEP #1
 def init():
-    # parse network.config and read the peer addresses
-    real_path = os.path.dirname(os.path.realpath(__file__))
-    peer_address_list = utils.util.env_from_sourcing(os.path.join(real_path, "../fabric-network/network.config"),
-                                                     "PeerAddress").split(" ")
-    peer_header_addr = peer_address_list[0].split(":")[0]
-    # initially the blockchain communicate server is load on the first peer
-    trainer.blockchain_server_url = "http://" + peer_header_addr + ":3000/invoke/mychannel/fabcar"
-    # initially the trigger url is load on the first peer
-    trainer.trigger_url = "http://" + peer_header_addr + ":" + str(fed_listen_port) + "/trigger"
+    trainer.init_urls(fed_listen_port)
 
     # parse args
-    trainer.parse_args(len(peer_address_list))
+    trainer.parse_args()
     logger.setLevel(trainer.args.log_level)
 
     load_result = trainer.init_dataset()
@@ -102,6 +94,8 @@ def train():
     train_start_time = time.time()
     w_local = trainer.train()
     w_local = trainer.poisoning_attack(w_local)
+    if trainer.args.sign_sgd:
+        w_local = model_store.extract_sign(w_local)
     trainer.round_train_duration = time.time() - train_start_time
 
     # send local model to the first node
@@ -133,7 +127,10 @@ def train_count(w_compressed):
     if model_store.local_models_count_num == trainer.args.num_users:
         logger.debug("Gathered enough train_ready, aggregate global model and send the download link.")
         # aggregate global model
-        w_glob = FedAvg(model_store.local_models)
+        if trainer.args.sign_sgd:
+            w_glob = signSGD(model_store.local_models, model_store.global_model, trainer.args.server_lr)
+        else:
+            w_glob = FedAvg(model_store.local_models)
         # reset local models after aggregation
         model_store.local_models_reset()
         # save global model for further download
