@@ -38,6 +38,12 @@ class Train:
         # if read num_users from blockchain
         if num_users:
             self.args.num_users = num_users
+        arguments = vars(self.args)
+        logger.info("==========================================")
+        for k, v in arguments.items():
+            arg = "{}: {}".format(k, v)
+            logger.info("* {0:<40}".format(arg))
+        logger.info("==========================================")
 
     def init_dataset(self):
         self.dataset_train, self.dataset_test, self.dict_users, self.test_users, self.skew_users = \

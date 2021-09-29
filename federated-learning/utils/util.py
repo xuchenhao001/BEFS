@@ -87,8 +87,6 @@ logger = logging.getLogger("util")
 
 def dataset_loader(dataset_name, dataset_train_size, isIID, num_users):
     dataset_test_size = int(dataset_train_size * 0.25)  # the dataset size ratio of the training to the test is 8:2
-    logger.info("Load dataset [%s] with training data size [%d], test data size [%d]" %
-                (dataset_name, dataset_train_size, dataset_test_size))
     dataset_train = None
     dataset_test = None
     dict_users = None
@@ -164,7 +162,6 @@ def dataset_loader(dataset_name, dataset_train_size, isIID, num_users):
 
 
 def model_loader(model_name, dataset_name, device, num_channels, num_classes, img_size):
-    logger.info("Load model [%s] for dataset [%s]. Train using device [%s]." % (model_name, dataset_name, device))
     net_glob = None
     # build model, init part
     if model_name == 'cnn' and dataset_name == 'cifar':
@@ -303,7 +300,7 @@ def generate_md5_hash(model_weights):
     return data_md5
 
 
-def extract_sign(w_local, w_glob):
+def extract_sign_by_diff(w_local, w_glob):
     w_signed = copy.deepcopy(w_local)
     for k in w_signed.keys():
         w_signed[k] = torch.sign(torch.sub(w_signed[k], w_glob[k]))

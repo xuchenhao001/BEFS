@@ -1,7 +1,7 @@
 import logging
 import threading
 
-from utils.util import ColoredLogger, compress_tensor, generate_md5_hash
+from utils.util import ColoredLogger, compress_tensor, generate_md5_hash, extract_sign_by_diff
 
 lock = threading.Lock()
 
@@ -41,6 +41,9 @@ class ModelStore:
             self.global_model_version += 1
         else:
             self.global_model_version = epochs
+
+    def extract_sign(self, w_local):
+        return extract_sign_by_diff(w_local, self.global_model)
 
 
 class AsyncModelStore(ModelStore):

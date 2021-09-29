@@ -10,7 +10,7 @@ from utils.CentralStore import NextRoundCount, ShutdownCount, IPCount
 from utils.ModelStore import ModelStore
 from utils.Train import Train
 from utils.util import ColoredLogger
-from models.Fed import FedAvg
+from models.Fed import FedAvg, signSGD
 
 logging.setLoggerClass(ColoredLogger)
 logging.getLogger('werkzeug').setLevel(logging.ERROR)
@@ -84,6 +84,8 @@ def train():
     train_start_time = time.time()
     w_local = trainer.train()
     w_local = trainer.poisoning_attack(w_local)
+    if trainer.args.sign_sgd:
+        w_local = model_store.extract_sign(w_local)
     trainer.round_train_time = time.time() - train_start_time
 
     # send local model to the first node
@@ -133,7 +135,10 @@ def average_local_w(uuid, from_ip, w_compressed):
     model_store.local_models_add(utils.util.decompress_tensor(w_compressed))
     if model_store.local_models_count_num == trainer.args.num_users:
         logger.debug("Gathered enough w, average and release them")
-        w_glob = FedAvg(model_store.local_models)
+        if trainer.args.sign_sgd:
+            w_glob = signSGD(model_store.local_models, model_store.global_model, trainer.args.server_lr)
+        else:
+            w_glob = FedAvg(model_store.local_models)
         # reset local models after aggregation
         model_store.local_models_reset()
         # save global model
