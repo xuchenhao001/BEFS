@@ -7,7 +7,7 @@ import threading
 from flask import Flask, request
 
 import utils
-from utils.CentralStore import ShutdownCount, NextRoundCount, IPCount
+from utils.CentralStore import IPCount
 from utils.ModelStore import APFLModelStore, ModelStore
 from utils.Train import APFLTrain
 from models.Fed import FedAvg
@@ -26,8 +26,6 @@ fed_listen_port = 8888
 trainer = APFLTrain()
 global_model_store = ModelStore()
 local_model_store = APFLModelStore()
-next_round = NextRoundCount()
-shutdown = ShutdownCount()
 ipCount = IPCount()
 
 
@@ -67,7 +65,6 @@ def train(w_global_local_compressed=None):
         trainer.uuid = fetch_uuid()
     logger.debug("Train local model for user: {}, epoch: {}.".format(trainer.uuid, trainer.epoch))
 
-    trainer.round_start_time = time.time()
     if trainer.is_first_epoch():
         trainer.init_time = time.time()
         # download initial global model
@@ -99,6 +96,7 @@ def train(w_global_local_compressed=None):
     # training for all epochs
     while trainer.epoch > 0:
         logger.info("Epoch [{}] train for user [{}]".format(trainer.epoch, trainer.uuid))
+        trainer.round_start_time = time.time()
         train_start_time = time.time()
         # compute v_bar
         for j in local_model_store.w_glob.keys():
@@ -135,7 +133,7 @@ def train(w_global_local_compressed=None):
         for j in local_model_store.w_glob.keys():
             local_model_store.w_locals_per[j] = trainer.hyper_para * local_model_store.w_locals[j] + \
                                           (1 - trainer.hyper_para) * local_model_store.w_glob_local[j]
-        trainer.round_train_time = time.time() - train_start_time
+        trainer.round_train_duration = time.time() - train_start_time
 
         trainer.evaluate_model_with_log(record_communication_time=True)
 

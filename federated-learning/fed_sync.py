@@ -102,7 +102,7 @@ def train():
     train_start_time = time.time()
     w_local = trainer.train()
     w_local = trainer.poisoning_attack(w_local)
-    trainer.round_train_time = time.time() - train_start_time
+    trainer.round_train_duration = time.time() - train_start_time
 
     # send local model to the first node
     w_local_compressed = utils.util.compress_tensor(w_local)

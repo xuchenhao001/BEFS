@@ -7,7 +7,7 @@ import threading
 from flask import Flask, request
 
 import utils.util
-from utils.CentralStore import NextRoundCount, ShutdownCount
+from utils.CentralStore import ShutdownCount
 from utils.ModelStore import AsyncModelStore
 from utils.Train import Train
 from utils.util import ColoredLogger
@@ -23,7 +23,6 @@ fed_listen_port = 8888
 # TO BE CHANGED FINISHED
 trainer = Train()
 model_store = AsyncModelStore()
-next_round = NextRoundCount()
 shutdown = ShutdownCount()
 
 
@@ -100,7 +99,7 @@ def train():
     train_start_time = time.time()
     w_local = trainer.train()
     w_local = trainer.poisoning_attack(w_local)
-    trainer.round_train_time = time.time() - train_start_time
+    trainer.round_train_duration = time.time() - train_start_time
 
     # send local model to the first node for aggregation
     w_local_compressed = utils.util.compress_tensor(w_local)
