@@ -1,15 +1,13 @@
 import copy
 
-import numpy as np
 import torch
-from torch.nn.utils import parameters_to_vector
 
 
 def FedAvg(w):
     w_avg = copy.deepcopy(w[0])
     for k in w_avg.keys():
         for i in range(1, len(w)):
-            w_avg[k] += w[i][k]
+            w_avg[k] = torch.add(w_avg[k], w[i][k])
         w_avg[k] = torch.div(w_avg[k], len(w))
     return w_avg
 
@@ -29,11 +27,11 @@ def FadeFedAvg(global_w, new_local_w, fade_c):
 # signSGD
 # """ aggregated majority sign update """
 def signSGD(w_list, w_glob, learning_rate):
-    w_signed = w_list[0].clone().type(torch.DoubleTensor)
+    w_signed = copy.deepcopy(w_list[0])
     for k in w_signed.keys():
         # for each key, calculate sum
         for i in range(1, len(w_list)):
-            w_signed[k] += w_list[i][k]
+            w_signed[k] = torch.add(w_signed[k], w_list[i][k])
         # for each key, calculate sign(sum)
         w_signed[k] = torch.sign(w_signed[k])
         # for each key, update w_glob by multiply sign(sum) with learning rate
