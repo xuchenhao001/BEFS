@@ -2,7 +2,7 @@
 
 # For ubuntu env error: findfont: Font family ['Times New Roman'] not found. Falling back to DejaVu Sans.
 # ```bash
-# sudo apt-get install msttcorefonts
+# sudo apt install msttcorefonts
 # rm -rf ~/.cache/matplotlib
 # ```
 import matplotlib.pyplot as plt
@@ -44,31 +44,24 @@ def get_font_settings(size):
     return font_factory
 
 
-def plot_time_acc(title, scale, xrange, fed_async, fed_avg, fed_sync, fed_localA, local_train, save_path=None,
-                  is_acc=True, plot_size="L"):
+def plot_time_acc(title, fed_sync_sgd, fed_sync, fed_avg, save_path=None, plot_size="L"):
     font_settings = get_font_settings(plot_size)
-    x = range(len(fed_async))
-    x = [value * scale for value in x]
+    x = range(1, len(fed_sync_sgd) + 1)
 
     fig, axes = plt.subplots()
 
-    axes.plot(x, fed_async, label="BAFL", linewidth=3)
-    axes.plot(x, fed_sync, label="BSFL", linestyle='--', alpha=0.5)
-    axes.plot(x, fed_localA, label="APFL", linestyle='--', alpha=0.5)
+    axes.plot(x, fed_sync_sgd, label="BEFS", linewidth=3)
+    axes.plot(x, fed_sync, label="BEFL", linestyle='--', alpha=0.5)
     axes.plot(x, fed_avg, label="FedAVG", linestyle='--', alpha=0.5)
-    axes.plot(x, local_train, label="Local", linestyle='--', alpha=0.5)
 
-    axes.set_xlabel("Running Time (seconds)", **font_settings.get("cs_xy_label_font"))
-    if is_acc:
-        axes.set_ylabel("Average Test Accuracy (%)", **font_settings.get("cs_xy_label_font"))
-    else:
-        axes.set_ylabel("Average Loss (MSE)", **font_settings.get("cs_xy_label_font"))
+    axes.set_xlabel("Training Round", **font_settings.get("cs_xy_label_font"))
+    axes.set_ylabel("Average Test Accuracy (%)", **font_settings.get("cs_xy_label_font"))
 
     plt.title(title, **font_settings.get("cs_title_font"))
     plt.xticks(**font_settings.get("cs_xy_ticks_font"))
     plt.yticks(**font_settings.get("cs_xy_ticks_font"))
     plt.tight_layout()
-    plt.xlim(0, xrange)
+    # plt.xlim(0, xrange)
     plt.legend(prop=font_settings.get("legend_font"), loc='lower right')
     plt.grid()
     if save_path:
