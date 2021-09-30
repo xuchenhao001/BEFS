@@ -13,11 +13,15 @@ class NextRoundCount:
     def __init__(self):
         self.next_round_count_num = 0
 
-    def add(self):
+    def add_count(self, count_target):
+        reach_target = False
         lock.acquire()
         self.next_round_count_num += 1
+        if self.next_round_count_num == count_target:
+            reach_target = True
         lock.release()
         logger.debug("Added next_round_count, now: {}".format(self.next_round_count_num))
+        return reach_target
 
     def reset(self):
         lock.acquire()
@@ -30,11 +34,15 @@ class ShutdownCount:
     def __init__(self):
         self.shutdown_count_num = 0
 
-    def add(self):
+    def add_count(self, count_target):
+        reach_target = False
         lock.acquire()
         self.shutdown_count_num += 1
+        if self.shutdown_count_num == count_target:
+            reach_target = True
         lock.release()
         logger.debug("Added shutdown_count_num, now: {}".format(self.shutdown_count_num))
+        return reach_target
 
     def reset(self):
         lock.acquire()

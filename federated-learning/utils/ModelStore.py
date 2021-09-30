@@ -20,12 +20,16 @@ class ModelStore:
         self.global_model_hash = None
         self.global_model_version = -1
 
-    def local_models_add(self, w_local):
+    def local_models_add_count(self, w_local, count_target):
+        reach_target = False
         lock.acquire()
         self.local_models.append(w_local)
         self.local_models_count_num += 1
+        if self.local_models_count_num == count_target:
+            reach_target = True
         lock.release()
         logger.debug("Added local_models, now: {}".format(len(self.local_models)))
+        return reach_target
 
     def local_models_reset(self):
         lock.acquire()

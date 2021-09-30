@@ -1,5 +1,4 @@
 import logging
-import os
 import sys
 import time
 import numpy as np
@@ -170,8 +169,8 @@ def load_uuid():
 
 def average_local_w(uuid, from_ip, w_glob_local_compressed):
     ipCount.set_map(uuid, from_ip)
-    global_model_store.local_models_add(utils.util.decompress_tensor(w_glob_local_compressed))
-    if global_model_store.local_models_count_num == trainer.args.num_users:
+    if global_model_store.local_models_add_count(utils.util.decompress_tensor(w_glob_local_compressed),
+                                                 trainer.args.num_users):
         logger.debug("Gathered enough w, average and release them")
         w_glob_local = FedAvg(global_model_store.local_models)
         # reset local models after aggregation

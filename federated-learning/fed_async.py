@@ -1,5 +1,4 @@
 import logging
-import os
 import random
 import sys
 import time
@@ -225,8 +224,7 @@ def round_finish():
 
 
 def shutdown_count():
-    shutdown.add()
-    if shutdown.shutdown_count_num == trainer.args.num_users:
+    if shutdown.add_count(trainer.args.num_users):
         # send request to blockchain for shutting down the python
         body_data = {
             "message": "ShutdownPython",

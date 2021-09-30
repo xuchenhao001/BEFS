@@ -122,9 +122,7 @@ def train():
 
 # STEP #3
 def train_count(w_compressed):
-    # append newly arrived w_local (decompressed) into g_train_local_models list for further aggregation
-    model_store.local_models_add(utils.util.decompress_tensor(w_compressed))
-    if model_store.local_models_count_num == trainer.args.num_users:
+    if model_store.local_models_add_count(utils.util.decompress_tensor(w_compressed), trainer.args.num_users):
         logger.debug("Gathered enough train_ready, aggregate global model and send the download link.")
         # aggregate global model
         if trainer.args.sign_sgd:
@@ -186,8 +184,7 @@ def round_finish():
 
 # count the next round requests gathered
 def next_round_count():
-    next_round.add()
-    if next_round.next_round_count_num == trainer.args.num_users:
+    if next_round.add_count(trainer.args.num_users):
         # reset counts
         next_round.reset()
         # START NEXT ROUND
@@ -201,8 +198,7 @@ def next_round_count():
 
 
 def shutdown_count():
-    shutdown.add()
-    if shutdown.shutdown_count_num == trainer.args.num_users:
+    if shutdown.add_count(trainer.args.num_users):
         # send request to blockchain for shutting down the python
         body_data = {
             "message": "ShutdownPython",

@@ -1,5 +1,4 @@
 import logging
-import os
 import sys
 import time
 import threading
@@ -122,8 +121,7 @@ def gathered_global_w(w_glob_compressed):
 
 def average_local_w(uuid, from_ip, w_compressed):
     ipCount.set_map(uuid, from_ip)
-    model_store.local_models_add(utils.util.decompress_tensor(w_compressed))
-    if model_store.local_models_count_num == trainer.args.num_users:
+    if model_store.local_models_add_count(utils.util.decompress_tensor(w_compressed), trainer.args.num_users):
         logger.debug("Gathered enough w, average and release them")
         if trainer.args.sign_sgd:
             w_glob = signSGD(model_store.local_models, model_store.global_model, trainer.args.server_lr)
