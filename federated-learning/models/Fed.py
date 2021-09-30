@@ -29,7 +29,7 @@ def FadeFedAvg(global_w, new_local_w, fade_c):
 # signSGD
 # """ aggregated majority sign update """
 def signSGD(w_list, w_glob, learning_rate):
-    w_signed = copy.deepcopy(w_list[0])
+    w_signed = w_list[0].clone().type(torch.DoubleTensor)
     for k in w_signed.keys():
         # for each key, calculate sum
         for i in range(1, len(w_list)):
