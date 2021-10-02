@@ -11,7 +11,6 @@ def args_parser():
     parser.add_argument('--local_bs', type=int, default=10, help="local batch size: B")
     parser.add_argument('--bs', type=int, default=128, help="test batch size")
     parser.add_argument('--lr', type=float, default=0.01, help="learning rate")
-    parser.add_argument('--server_lr', type=float, default=0.0001, help="server learning rate")
     parser.add_argument('--momentum', type=float, default=0.5, help="SGD momentum (default: 0.5)")
     parser.add_argument('--split', type=str, default='user', help="train-test split type, user or sample")
 
@@ -62,6 +61,8 @@ def args_parser():
     parser.add_argument("--ddos_no_response_percent", type=float, default=0.9)
     # sign SGD, default is false
     parser.add_argument('--sign_sgd', action='store_true', help='whether adopting sign SGD or not')
+    parser.add_argument('--server_lr', type=float, default=0.001, help="sign SGD server learning rate")
+    parser.add_argument('--sign_sgd_beta', type=float, default=0.9, help="beta parameter in sign SGD momentum")
 
     args = parser.parse_args()
     return args

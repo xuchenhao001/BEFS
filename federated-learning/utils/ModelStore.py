@@ -14,11 +14,12 @@ class ModelStore:
     def __init__(self):
         self.local_models_count_num = 0
         self.local_models = []
-
         self.global_model = None
         self.global_model_compressed = None
         self.global_model_hash = None
         self.global_model_version = -1
+        # for sign SGD
+        self.momentum = {}  # momentum is a dictionary
 
     def local_models_add_count(self, w_local, count_target):
         reach_target = False
@@ -47,8 +48,9 @@ class ModelStore:
         else:
             self.global_model_version = epochs
 
-    def extract_sign(self, w_local):
-        return extract_sign_by_diff(w_local, self.global_model)
+    def extract_sign(self, w_local, beta):
+        print("global model hash: {}".format(self.global_model_hash))
+        return extract_sign_by_diff(w_local, self.global_model, self.momentum, beta)
 
 
 class AsyncModelStore(ModelStore):

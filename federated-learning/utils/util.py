@@ -300,10 +300,16 @@ def generate_md5_hash(model_weights):
     return data_md5
 
 
-def extract_sign_by_diff(w_local, w_glob):
+def extract_sign_by_diff(w_local, w_glob, momentum, beta):
     w_signed = copy.deepcopy(w_local)
-    for k in w_signed.keys():
-        w_signed[k] = torch.sign(torch.sub(w_signed[k], w_glob[k]))
+    sgd = copy.deepcopy(w_local)
+    for k in w_local.keys():
+        sgd[k] = torch.sub(w_local[k], w_glob[k])
+        # update momentum
+        if k not in momentum:
+            momentum[k] = torch.zeros_like(sgd[k])  # initialize momentum with zero
+        momentum[k] = torch.add(torch.mul(momentum[k], beta), torch.mul(sgd[k], 1-beta))
+        w_signed[k] = torch.sign(momentum[k])
     return w_signed
 
 
