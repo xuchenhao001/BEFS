@@ -31,6 +31,7 @@ class Train:
         self.round_train_duration = 0
         self.epoch = -1
         self.uuid = -1
+        self.server_learning_rate_count = 0
 
     def parse_args(self):
         self.args = args_parser()
@@ -69,7 +70,7 @@ class Train:
         img_size = self.dataset_train[0][0].shape
         self.net_glob = model_loader(self.args.model, self.args.dataset, self.args.device, self.args.num_channels,
                                      self.args.num_classes, img_size)
-        if self.dataset_train is None:
+        if self.net_glob is None:
             logger.error('Error: unrecognized model')
             return False
         return True
@@ -125,6 +126,13 @@ class Train:
             logger.debug("As a poisoning attacker ({}), manipulate local gradients!".format(self.args.attackers))
             w_local = disturb_w(w_local)
         return w_local
+
+    # for dynamic adjusting server learning rate by multiply 0.1 in every 20 rounds of training
+    def server_learning_rate_adjust(self):
+        self.server_learning_rate_count += 1
+        if self.server_learning_rate_count % 10 == 0:
+            self.args.server_lr *= 0.1
+            logger.info("Dynamic adjusting the server learning rate to {}.".format(self.args.server_lr))
 
 
 class APFLTrain(Train):

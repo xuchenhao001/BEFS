@@ -4,7 +4,7 @@ import argparse
 def args_parser():
     parser = argparse.ArgumentParser()
     # federated arguments
-    parser.add_argument('--epochs', type=int, default=50, help="rounds of training")
+    parser.add_argument('--epochs', type=int, default=200, help="rounds of training")
     # parser.add_argument('--num_users', type=int, default=15, help="number of users: K")
     parser.add_argument('--frac', type=float, default=1.0, help="the fraction of clients: C")
     parser.add_argument('--local_ep', type=int, default=5, help="the number of local epochs: E")
@@ -25,8 +25,8 @@ def args_parser():
     parser.add_argument('--max_pool', type=str, default='True',
                         help="Whether use max pooling rather than strided convolutions")
 
-    # support dataset: "mnist", "fashion_mnist", "cifar", "uci", "realworld", "loop"
-    parser.add_argument('--dataset', type=str, default='fashion_mnist', help="name of dataset")
+    # support dataset: "mnist", "fmnist", "cifar", "uci", "realworld", "loop"
+    parser.add_argument('--dataset', type=str, default='fmnist', help="name of dataset")
     parser.add_argument('--iid', action='store_true', help='whether i.i.d or not')
     parser.add_argument('--num_classes', type=int, default=10, help="number of classes")
     parser.add_argument('--num_channels', type=int, default=1, help="number of channels of imges")
@@ -61,7 +61,7 @@ def args_parser():
     parser.add_argument("--ddos_no_response_percent", type=float, default=0.9)
     # sign SGD, default is false
     parser.add_argument('--sign_sgd', action='store_true', help='whether adopting sign SGD or not')
-    parser.add_argument('--server_lr', type=float, default=0.001, help="sign SGD server learning rate")
+    parser.add_argument('--server_lr', type=float, default=0.01, help="sign SGD server learning rate")
     parser.add_argument('--sign_sgd_beta', type=float, default=0.9, help="beta parameter in sign SGD momentum")
 
     args = parser.parse_args()
