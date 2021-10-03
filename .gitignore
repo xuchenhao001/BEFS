@@ -7,7 +7,6 @@ config/
 wallet/
 fabric-network/bin/
 result-record_*
-output/
 *.log
 raft/hraftd
 networkCache.tar.gz
