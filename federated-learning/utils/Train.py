@@ -116,9 +116,9 @@ class Train:
         return self.epoch == self.args.epochs
 
     def train(self):
-        w_local, _ = local_update(copy.deepcopy(self.net_glob).to(self.args.device), self.dataset_train,
-                                  self.dict_users[self.uuid - 1], self.args)
-        return w_local
+        w_local, loss = local_update(copy.deepcopy(self.net_glob).to(self.args.device), self.dataset_train,
+                                     self.dict_users[self.uuid - 1], self.args)
+        return w_local, loss
 
     def poisoning_attack(self, w_local):
         # fake attackers

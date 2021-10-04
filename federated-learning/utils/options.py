@@ -26,7 +26,7 @@ def args_parser():
                         help="Whether use max pooling rather than strided convolutions")
 
     # support dataset: "mnist", "fmnist", "cifar", "uci", "realworld", "loop"
-    parser.add_argument('--dataset', type=str, default='fmnist', help="name of dataset")
+    parser.add_argument('--dataset', type=str, default='cifar', help="name of dataset")
     parser.add_argument('--iid', action='store_true', help='whether i.i.d or not')
     parser.add_argument('--num_classes', type=int, default=10, help="number of classes")
     parser.add_argument('--num_channels', type=int, default=1, help="number of channels of imges")
