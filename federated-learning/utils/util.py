@@ -318,7 +318,6 @@ def extract_sign_by_diff(w_local, w_glob, momentum, beta):
             precision = math.floor(math.log10(abs(sgd_k_mean)))
         except ValueError:
             precision = -8
-        print("sgd_k_mean: {}, precision: {}".format(sgd_k_mean, precision))
         precision_list.append(precision)
     precision_mode = max(precision_list, key=precision_list.count)  # find out the mode of the precisions
     return w_signed, precision_mode
