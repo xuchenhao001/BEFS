@@ -4,7 +4,7 @@ from utils.parse_output import calculate_average_across_files
 
 
 def extract_round_acc():
-    exp_node_number = "dynamic"
+    exp_node_number = "loss"
     model_name = "cnn"
     dataset_name = "cifar"
 

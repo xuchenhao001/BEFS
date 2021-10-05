@@ -5,6 +5,7 @@ import gzip
 import hashlib
 import json
 import logging
+import math
 import random
 import requests
 import socket
@@ -303,14 +304,24 @@ def generate_md5_hash(model_weights):
 def extract_sign_by_diff(w_local, w_glob, momentum, beta):
     w_signed = copy.deepcopy(w_local)
     sgd = copy.deepcopy(w_local)
+    precision_list = []
     for k in w_local.keys():
         sgd[k] = torch.sub(w_local[k], w_glob[k])
         # update momentum
         if k not in momentum:
             momentum[k] = torch.zeros_like(sgd[k])  # initialize momentum with zero
         momentum[k] = torch.add(torch.mul(momentum[k], beta), torch.mul(sgd[k], 1-beta))
-        w_signed[k] = torch.sign(momentum[k])
-    return w_signed
+        # w_signed[k] = torch.sign(momentum[k])
+        w_signed[k] = torch.sign(sgd[k])
+        sgd_k_mean = torch.mean(sgd[k]).item()
+        try:
+            precision = math.floor(math.log10(abs(sgd_k_mean)))
+        except ValueError:
+            precision = -8
+        print("sgd_k_mean: {}, precision: {}".format(sgd_k_mean, precision))
+        precision_list.append(precision)
+    precision_mode = max(precision_list, key=precision_list.count)  # find out the mode of the precisions
+    return w_signed, precision_mode
 
 
 def disturb_w(w):
