@@ -316,7 +316,7 @@ def extract_sign_by_diff(w_local, w_glob, momentum, beta):
         sgd_k_mean = torch.mean(sgd[k].type(torch.FloatTensor)).item()
         try:
             precision = math.floor(math.log10(abs(sgd_k_mean)))
-        except ValueError:
+        except (ValueError, OverflowError) as e:
             precision = -8
         precision_list.append(precision)
     precision_mode = max(precision_list, key=precision_list.count)  # find out the mode of the precisions
