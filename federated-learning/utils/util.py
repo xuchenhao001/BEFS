@@ -311,8 +311,8 @@ def extract_sign_by_diff(w_local, w_glob, momentum, beta):
         if k not in momentum:
             momentum[k] = torch.zeros_like(sgd[k])  # initialize momentum with zero
         momentum[k] = torch.add(torch.mul(momentum[k], beta), torch.mul(sgd[k], 1-beta))
-        # w_signed[k] = torch.sign(momentum[k])
-        w_signed[k] = torch.sign(sgd[k])
+        w_signed[k] = torch.sign(momentum[k])
+        # w_signed[k] = torch.sign(sgd[k])
         sgd_k_mean = torch.mean(sgd[k].type(torch.FloatTensor)).item()
         try:
             precision = math.floor(math.log10(abs(sgd_k_mean)))
