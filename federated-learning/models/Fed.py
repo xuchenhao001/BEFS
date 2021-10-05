@@ -50,8 +50,8 @@ def signSGD(w_list, w_precision_list, w_glob, server_learning_rate):
         # for each key, calculate sign(sum)
         w_signed[k] = torch.sign(w_signed[k])
         # for each key, update w_glob by multiply sign(sum) with learning rate
-        # new_w_glob[k] = torch.add(w_glob[k], torch.mul(w_signed[k], server_learning_rate))
-        precision_max = max(w_precision_list)  # find out the max of the precisions
-        new_w_glob[k] = torch.add(w_glob[k], torch.mul(w_signed[k], math.pow(10, precision_max)))
+        new_w_glob[k] = torch.add(w_glob[k], torch.mul(w_signed[k], server_learning_rate))
+        # precision_max = max(w_precision_list)  # find out the max of the precisions
+        # new_w_glob[k] = torch.add(w_glob[k], torch.mul(w_signed[k], math.pow(10, precision_max)))
     return new_w_glob
 
