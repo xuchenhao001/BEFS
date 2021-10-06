@@ -48,9 +48,9 @@ def args_parser():
     # ip address that is used to test local IP
     parser.add_argument('--test_ip_addr', type=str, default="10.150.187.13", help="ip address used to test local IP")
     # sleep for several seconds before start train
-    parser.add_argument('--start_sleep', type=int, default=300, help="sleep for seconds before start train")
+    parser.add_argument('--start_sleep', type=int, default=180, help="sleep for seconds before start train")
     # sleep for several seconds before exit python
-    parser.add_argument('--exit_sleep', type=int, default=300, help="sleep for seconds before exit python")
+    parser.add_argument('--exit_sleep', type=int, default=60, help="sleep for seconds before exit python")
     # poisoning attacker ids, must be string type "1", "2", ... . "-1" means no poisoning attack
     parser.add_argument("--poisoning_attackers", nargs="+", default=[])
     # poisoning attacker accuracy detecting threshold
