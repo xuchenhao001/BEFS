@@ -14,7 +14,7 @@ class ModelStore:
     def __init__(self):
         self.local_models_count_num = 0
         self.local_models = []
-        self.local_precisions = []
+        self.local_losses = []
         self.global_model = None
         self.global_model_compressed = None
         self.global_model_hash = None
@@ -22,11 +22,11 @@ class ModelStore:
         # for sign SGD
         self.momentum = {}  # momentum is a dictionary
 
-    def local_models_add_count(self, w_local, w_precision, count_target):
+    def local_models_add_count(self, w_local, w_loss, count_target):
         reach_target = False
         lock.acquire()
         self.local_models.append(w_local)
-        self.local_precisions.append(w_precision)
+        self.local_losses.append(w_loss)
         self.local_models_count_num += 1
         if self.local_models_count_num == count_target:
             reach_target = True
@@ -37,7 +37,7 @@ class ModelStore:
     def local_models_reset(self):
         lock.acquire()
         self.local_models = []
-        self.local_precisions = []
+        self.local_losses = []
         self.local_models_count_num = 0
         lock.release()
         logger.debug("Reset local_models, now: {}".format(len(self.local_models)))

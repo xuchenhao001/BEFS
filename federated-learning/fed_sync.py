@@ -91,11 +91,10 @@ def train():
         trainer.evaluate_model_with_log(record_epoch=0, clean=True)
 
     train_start_time = time.time()
-    w_local, _ = trainer.train()
+    w_local, w_loss = trainer.train()
     w_local = trainer.poisoning_attack(w_local)
-    w_precision = -8
     if trainer.args.sign_sgd:
-        w_local, w_precision = model_store.extract_sign(w_local, trainer.args.sign_sgd_beta)
+        w_local = model_store.extract_sign(w_local, trainer.args.sign_sgd_beta)
     trainer.round_train_duration = time.time() - train_start_time
 
     # send local model to the first node
@@ -103,7 +102,7 @@ def train():
     body_data = {
         "message": "train_ready",
         "w_compressed": w_local_compressed,
-        "w_precision": w_precision,
+        "w_loss": w_loss,
     }
     trainer.post_msg_trigger(body_data)
 
@@ -122,13 +121,13 @@ def train():
 
 
 # STEP #3
-def train_count(w_compressed, w_precision):
-    if model_store.local_models_add_count(utils.util.decompress_tensor(w_compressed), w_precision, trainer.args.num_users):
+def train_count(w_compressed, w_loss):
+    if model_store.local_models_add_count(utils.util.decompress_tensor(w_compressed), w_loss, trainer.args.num_users):
         logger.debug("Gathered enough train_ready, aggregate global model and send the download link.")
         # aggregate global model
         if trainer.args.sign_sgd:
             trainer.server_learning_rate_adjust()
-            w_glob = signSGD(model_store.local_models, model_store.local_precisions, model_store.global_model,
+            w_glob = signSGD(model_store.local_models, model_store.local_losses, model_store.global_model,
                              trainer.args.server_lr)
         else:
             w_glob = FedAvg(model_store.local_models)
@@ -263,7 +262,7 @@ def my_route(app):
             message = data.get("message")
 
             if message == "train_ready":
-                threading.Thread(target=train_count, args=(data.get("w_compressed"), data.get("w_precision"))).start()
+                threading.Thread(target=train_count, args=(data.get("w_compressed"), data.get("w_loss"))).start()
             elif message == "global_model":
                 detail = download_global_model(data.get("epochs"))
             elif message == "next_round_count":
