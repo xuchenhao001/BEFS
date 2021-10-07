@@ -36,6 +36,7 @@ def FadeFedAvg(global_w, new_local_w, fade_c):
 def signSGD(w_list, w_precision_list, w_glob, server_learning_rate):
     w_signed = {}
     new_w_glob = copy.deepcopy(w_glob)
+    print("w_precision_list: {}".format(w_precision_list))
     for k in w_glob.keys():
         # for each key, calculate sum
         for i in range(len(w_list)):

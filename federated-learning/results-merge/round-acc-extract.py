@@ -4,7 +4,7 @@ from utils.parse_output import calculate_average_across_files
 
 
 def extract_round_acc():
-    exp_node_number = "increased"
+    exp_node_number = "decreased"
     model_name = "mlp"
     dataset_name = "fmnist"
 
