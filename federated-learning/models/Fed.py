@@ -59,7 +59,7 @@ def normalize(loss_list):
     for loss in loss_list:
         try:
             reciprocal = loss_sum / float(loss)
-        except (ValueError, OverflowError) as e:
+        except (ZeroDivisionError, ValueError, OverflowError) as e:
             reciprocal = loss_sum / 0.0000001
         reciprocal_list.append(reciprocal)
     # reciprocal_list = [sum(loss_list) / float(loss) for loss in loss_list]
