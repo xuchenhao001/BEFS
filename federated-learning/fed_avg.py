@@ -125,7 +125,7 @@ def average_local_w(uuid, from_ip, w_compressed, w_loss):
     if model_store.local_models_add_count(utils.util.decompress_tensor(w_compressed), w_loss, trainer.args.num_users):
         logger.debug("Gathered enough w, average and release them")
         if trainer.args.sign_sgd:
-            trainer.server_learning_rate_adjust()
+            # trainer.server_learning_rate_adjust()
             w_glob = signSGD(model_store.local_models, model_store.local_losses, model_store.global_model,
                              trainer.args.server_lr)
         else:
