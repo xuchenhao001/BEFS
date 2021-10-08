@@ -127,7 +127,7 @@ def train_count(w_compressed, w_precision):
         logger.debug("Gathered enough train_ready, aggregate global model and send the download link.")
         # aggregate global model
         if trainer.args.sign_sgd:
-            # trainer.server_learning_rate_adjust()
+            trainer.server_learning_rate_adjust()
             w_glob = signSGD(model_store.local_models, model_store.local_precisions, model_store.global_model,
                              trainer.args.server_lr)
         else:
