@@ -54,19 +54,17 @@ def signSGD(w_list, w_loss_list, w_glob, server_learning_rate):
 
 
 def normalize(loss_list):
-    reciprocal_list = []
-    loss_sum = sum(loss_list)
+    loss_log_list = []
     for loss in loss_list:
         try:
-            reciprocal = loss_sum / float(loss)
-        except (ZeroDivisionError, ValueError, OverflowError) as e:
-            reciprocal = loss_sum / 0.0000001
-        reciprocal_list.append(reciprocal)
-    # reciprocal_list = [sum(loss_list) / float(loss) for loss in loss_list]
-    if sum(reciprocal_list) <= 0.0000001:
-        normalized_list = [1.0 / len(reciprocal_list) for _ in reciprocal_list]
+            loss_log = 20 + math.log10(loss)
+        except (ValueError, OverflowError) as e:
+            loss_log = 0
+        loss_log_list.append(loss_log)
+
+    if sum(loss_log_list) <= 0.0000001:
+        normalized_list = [1.0 / len(loss_log_list) for _ in loss_log_list]
     else:
-        normalized_list = [float(i) / sum(reciprocal_list) for i in reciprocal_list]
-    # normalized_list = [float(i) / sum(reciprocal_list) for i in reciprocal_list]
+        normalized_list = [float(loss_log) / sum(loss_log_list) for loss_log in loss_log_list]
     logger.debug("Normalized loss list: {}".format(normalized_list))
     return normalized_list
