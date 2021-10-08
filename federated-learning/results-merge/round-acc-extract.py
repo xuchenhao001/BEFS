@@ -4,9 +4,9 @@ from utils.parse_output import calculate_average_across_files
 
 
 def extract_round_acc():
-    exp_node_number = "decreased"
-    model_name = "mlp"
-    dataset_name = "fmnist"
+    exp_node_number = "loss"
+    model_name = "cnn"
+    dataset_name = "cifar"
 
     # experiment_names = ["fed_avg", "fed_sync", "fed_sync_sgd_1", "fed_sync_sgd_01", "fed_sync_sgd_001", "fed_sync_sgd_0001"]
     experiment_names = ["fed_avg", "fed_sync", "fed_sync_sgd"]
