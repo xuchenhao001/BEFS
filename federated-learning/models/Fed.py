@@ -57,9 +57,9 @@ def normalize(loss_list):
     loss_log_list = []
     for loss in loss_list:
         try:
-            loss_log = 20 + math.log10(loss)
+            loss_log = -math.log10(loss)
         except (ValueError, OverflowError) as e:
-            loss_log = 0
+            loss_log = 10
         loss_log_list.append(loss_log)
 
     if sum(loss_log_list) <= 0.0000001:
