@@ -47,7 +47,7 @@ def signSGD(w_list, w_precision_list, w_glob, server_learning_rate):
             else:
                 precision_multiply = math.pow(10, w_precision_list[i])
             weighted_sgd = torch.mul(w_list[i][k], precision_multiply)
-            w_signed[k] = torch.add(w_signed[k], weighted_sgd)
+            w_signed[k] = torch.add(w_signed[k], w_list[i][k])
         # for each key, calculate sign(sum)
         w_signed[k] = torch.sign(w_signed[k])
         # for each key, update w_glob by multiply sign(sum) with learning rate
