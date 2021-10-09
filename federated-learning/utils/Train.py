@@ -130,7 +130,8 @@ class Train:
     # for dynamic adjusting server learning rate by multiply 0.1 in every 20 rounds of training
     def server_learning_rate_adjust(self):
         self.server_learning_rate_count += 1
-        if self.server_learning_rate_count % 20 == 0:
+        if self.args.server_lr_scale_period > 0 and \
+                self.server_learning_rate_count % self.args.server_lr_scale_period == 0:
             self.args.server_lr *= 0.1
             logger.info("Dynamic adjusting the server learning rate to {}.".format(self.args.server_lr))
 

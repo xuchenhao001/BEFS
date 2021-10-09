@@ -62,6 +62,8 @@ def args_parser():
     # sign SGD, default is false
     parser.add_argument('--sign_sgd', action='store_true', help='whether adopting sign SGD or not')
     parser.add_argument('--server_lr', type=float, default=0.01, help="sign SGD server learning rate")
+    parser.add_argument('--server_lr_scale_period', type=int, default=20,
+                        help="dynamic adjust sign SGD server learning rate period (rounds), -1 means no adjustment")
     parser.add_argument('--sign_sgd_beta', type=float, default=0.5, help="beta parameter in sign SGD momentum")
 
     args = parser.parse_args()
