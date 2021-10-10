@@ -73,6 +73,35 @@ def plot_time_acc(title, fed_sync_sgd_1, fed_sync_sgd_01, fed_sync_sgd_001, fed_
         plt.show()
 
 
+def plot_time_acc_lrsc(title, fed_sync_lrsc_5, fed_sync_lrsc_10, fed_sync_lrsc_20, fed_sync, fed_avg, save_path=None, plot_size="L"):
+    font_settings = get_font_settings(plot_size)
+    x = range(1, len(fed_sync_lrsc_5) + 1)
+
+    fig, axes = plt.subplots()
+
+    axes.plot(x, fed_sync_lrsc_5, label="Scale Round=5", linewidth=1)
+    axes.plot(x, fed_sync_lrsc_10, label="Scale Round=10", linewidth=1)
+    axes.plot(x, fed_sync_lrsc_20, label="Scale Round=20", linewidth=1)
+    axes.plot(x, fed_sync, label="BEFL", linestyle='--', alpha=0.5)
+    axes.plot(x, fed_avg, label="FedAVG", linestyle='--', alpha=0.5)
+
+    axes.set_xlabel("Training Round", **font_settings.get("cs_xy_label_font"))
+    axes.set_ylabel("Average Test Accuracy (%)", **font_settings.get("cs_xy_label_font"))
+
+    plt.title(title, **font_settings.get("cs_title_font"))
+    plt.xticks(**font_settings.get("cs_xy_ticks_font"))
+    plt.yticks(**font_settings.get("cs_xy_ticks_font"))
+    plt.tight_layout()
+    # plt.xlim(0, xrange)
+    plt.legend(prop=font_settings.get("legend_font"), loc='lower right')
+    plt.grid()
+    if save_path:
+        plt.savefig(save_path)
+    else:
+        plt.show()
+
+
+
 def plot_static_time_acc(title, scale, xrange, fed_async, fed_async_f05, fed_async_f10, fed_async_f15, save_path=None,
                          is_acc=True, plot_size="L"):
     font_settings = get_font_settings(plot_size)
