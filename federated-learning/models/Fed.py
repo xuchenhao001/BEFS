@@ -33,7 +33,7 @@ def FadeFedAvg(global_w, new_local_w, fade_c):
 
 # signSGD
 # """ aggregated majority sign update """
-def signSGD(w_list, w_precision_list, w_glob, server_learning_rate):
+def signSGD(w_list, w_precision_list, w_glob, server_learning_rate, num_nodes):
     logger.debug("w_precision_list: {}".format(w_precision_list))
     w_signed = {}
     new_w_glob = copy.deepcopy(w_glob)
@@ -49,7 +49,9 @@ def signSGD(w_list, w_precision_list, w_glob, server_learning_rate):
             weighted_sgd = torch.mul(w_list[i][k], precision_multiply)
             w_signed[k] = torch.add(w_signed[k], w_list[i][k])
         # for each key, calculate sign(sum)
-        w_signed[k] = torch.sign(w_signed[k])
+        # w_signed[k] = torch.sign(w_signed[k])
+        # node sign weighted aggregation
+        w_signed[k] = torch.div(w_signed[k], num_nodes)
         # for each key, update w_glob by multiply sign(sum) with learning rate
         new_w_glob[k] = torch.add(w_glob[k], torch.mul(w_signed[k], server_learning_rate))
         # precision_max = max(w_precision_list)  # find out the max of the precisions

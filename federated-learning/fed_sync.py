@@ -129,7 +129,7 @@ def train_count(w_compressed, w_precision):
         if trainer.args.sign_sgd:
             trainer.server_learning_rate_adjust()
             w_glob = signSGD(model_store.local_models, model_store.local_precisions, model_store.global_model,
-                             trainer.args.server_lr)
+                             trainer.args.server_lr, trainer.args.num_users)
         else:
             w_glob = FedAvg(model_store.local_models)
         # reset local models after aggregation
