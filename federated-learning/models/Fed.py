@@ -38,6 +38,7 @@ def signSGD(w_list, w_precision_list, w_glob, server_learning_rate, num_nodes):
     w_signed = {}
     new_w_glob = copy.deepcopy(w_glob)
     for k in w_glob.keys():
+        precision_multiply_list = []
         # for each key, calculate sum
         for i in range(len(w_list)):
             if k not in w_signed:
@@ -46,12 +47,14 @@ def signSGD(w_list, w_precision_list, w_glob, server_learning_rate, num_nodes):
                 precision_multiply = 0
             else:
                 precision_multiply = math.pow(10, w_precision_list[i])
+            precision_multiply_list.append(precision_multiply)
             weighted_sgd = torch.mul(w_list[i][k], precision_multiply)
-            w_signed[k] = torch.add(w_signed[k], w_list[i][k])
+            w_signed[k] = torch.add(w_signed[k], weighted_sgd)
         # for each key, calculate sign(sum)
         # w_signed[k] = torch.sign(w_signed[k])
-        # node sign weighted aggregation
-        w_signed[k] = torch.div(w_signed[k], num_nodes)
+        # node sign precision weighted aggregation
+        precision_max = max(precision_multiply_list)
+        w_signed[k] = torch.div(w_signed[k], num_nodes * precision_max)
         # for each key, update w_glob by multiply sign(sum) with learning rate
         new_w_glob[k] = torch.add(w_glob[k], torch.mul(w_signed[k], server_learning_rate))
         # precision_max = max(w_precision_list)  # find out the max of the precisions
