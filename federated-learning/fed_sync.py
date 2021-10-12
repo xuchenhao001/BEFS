@@ -94,8 +94,8 @@ def train():
     w_local, w_loss = trainer.train()
     w_local = trainer.poisoning_attack(w_local)
     w_precision = -8
-    # if trainer.args.sign_sgd:
-    #     w_local, w_precision = model_store.extract_sign(w_local, trainer.args.sign_sgd_beta)
+    if trainer.args.sign_sgd:
+        w_local, w_precision = model_store.extract_sign(w_local, trainer.args.sign_sgd_beta)
     trainer.round_train_duration = time.time() - train_start_time
 
     # send local model to the first node
