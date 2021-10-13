@@ -38,10 +38,15 @@ def signSGD(w_list, w_precision_list, w_glob, server_learning_rate, num_nodes):
     new_w_glob = copy.deepcopy(w_glob)
     for k in w_glob.keys():
         # for each key, calculate sum
-        for i in range(len(w_list)):
-            if k not in w_signed:
-                w_signed[k] = torch.zeros_like(w_list[i][k])
-            w_signed[k] = torch.add(w_signed[k], w_list[i][k])
+        # for i in range(len(w_list)):
+        #     if k not in w_signed:
+        #         w_signed[k] = torch.zeros_like(w_list[i][k])
+        #     w_signed[k] = torch.add(w_signed[k], w_list[i][k])
+        # only the first local model is aggregated:
+        if k not in w_signed:
+            w_signed[k] = torch.zeros_like(w_list[0][k])
+        w_signed[k] = torch.add(w_signed[k], w_list[0][k])
+
         w_signed[k] = torch.sign(w_signed[k])
         new_w_glob[k] = torch.add(w_glob[k], torch.mul(w_signed[k], server_learning_rate))
     return new_w_glob
