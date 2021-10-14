@@ -33,20 +33,17 @@ def FadeFedAvg(global_w, new_local_w, fade_c):
 
 # signSGD
 # """ aggregated majority sign update """
-def signSGD(w_list, w_precision_list, w_glob, server_learning_rate, num_nodes):
-    w_signed = {}
+def signSGD(w_list, w_glob, server_learning_rate, num_nodes):
     new_w_glob = copy.deepcopy(w_glob)
     for k in w_glob.keys():
+        signed_w_sum = {}
         # for each key, calculate sum
-        # for i in range(len(w_list)):
-        #     if k not in w_signed:
-        #         w_signed[k] = torch.zeros_like(w_list[i][k])
-        #     w_signed[k] = torch.add(w_signed[k], w_list[i][k])
-        # only the first local model is aggregated:
-        if k not in w_signed:
-            w_signed[k] = torch.zeros_like(w_list[0][k])
-        w_signed[k] = torch.add(w_signed[k], w_list[0][k])
-
-        w_signed[k] = torch.sign(w_signed[k])
-        new_w_glob[k] = torch.add(w_glob[k], torch.mul(w_signed[k], server_learning_rate))
+        for i in range(len(w_list)):
+            if k not in signed_w_sum:
+                signed_w_sum[k] = torch.zeros_like(w_list[i][k])
+            signed_w_sum[k] = torch.add(signed_w_sum[k], w_list[i][k])
+        # node sign weighted aggregation
+        signed_w_sum[k] = torch.div(signed_w_sum[k], num_nodes)
+        # for each key, update w_glob by multiply sign(sum) with learning rate
+        new_w_glob[k] = torch.add(w_glob[k], torch.mul(signed_w_sum[k], server_learning_rate))
     return new_w_glob

@@ -73,9 +73,8 @@ def train():
     train_start_time = time.time()
     w_local, w_loss = trainer.train()
     w_local = trainer.poisoning_attack(w_local)
-    w_precision = -8
     if trainer.args.sign_sgd:
-        w_local, w_precision = model_store.extract_sign(w_local, trainer.args.sign_sgd_beta)
+        w_local = model_store.extract_sign(w_local, trainer.args.sign_sgd_beta)
     trainer.round_train_duration = time.time() - train_start_time
 
     # send local model to the first node
@@ -84,7 +83,6 @@ def train():
     body_data = {
         "message": "upload_local_w",
         "w_compressed": w_local_compressed,
-        "w_precision": w_precision,
         "uuid": trainer.uuid,
         "from_ip": from_ip,
     }
@@ -121,14 +119,14 @@ def gathered_global_w(w_glob_compressed):
         trainer.post_msg_trigger(body_data)
 
 
-def average_local_w(uuid, from_ip, w_compressed, local_precisions):
+def average_local_w(uuid, from_ip, w_compressed):
     ipCount.set_map(uuid, from_ip)
-    if model_store.local_models_add_count(utils.util.decompress_tensor(w_compressed), local_precisions, trainer.args.num_users):
+    if model_store.local_models_add_count(utils.util.decompress_tensor(w_compressed), trainer.args.num_users):
         logger.debug("Gathered enough w, average and release them")
         if trainer.args.sign_sgd:
             trainer.server_learning_rate_adjust()
-            w_glob = signSGD(model_store.local_models, model_store.local_precisions, model_store.global_model,
-                             trainer.args.server_lr, trainer.args.num_users)
+            w_glob = signSGD(model_store.local_models, model_store.global_model, trainer.args.server_lr,
+                             trainer.args.num_users)
         else:
             w_glob = FedAvg(model_store.local_models)
         # reset local models after aggregation
@@ -186,7 +184,7 @@ def my_route(app):
                 detail = load_global_model(data.get("epochs"))
             elif message == "upload_local_w":
                 threading.Thread(target=average_local_w, args=(
-                    data.get("uuid"), data.get("from_ip"), data.get("w_compressed"), data.get("w_precision"))).start()
+                    data.get("uuid"), data.get("from_ip"), data.get("w_compressed"))).start()
             elif message == "release_global_w":
                 threading.Thread(target=gathered_global_w, args=(data.get("w_compressed"), )).start()
             elif message == "shutdown_python":
