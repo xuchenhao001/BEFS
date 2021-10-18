@@ -2,6 +2,8 @@ import copy
 import logging
 import threading
 
+import torch
+
 from utils.util import ColoredLogger, compress_tensor, generate_md5_hash, extract_sign_by_diff
 
 lock = threading.Lock()
@@ -20,6 +22,7 @@ class ModelStore:
         self.global_model_version = -1
         # for sign SGD
         self.momentum = {}  # momentum is a dictionary
+        self.server_step = {}
 
     def local_models_add_count(self, w_local, count_target):
         reach_target = False
@@ -48,8 +51,14 @@ class ModelStore:
         else:
             self.global_model_version = epochs
 
-    def extract_sign(self, w_local, beta):
-        return extract_sign_by_diff(w_local, self.global_model, self.momentum, beta)
+    # update server step by subtracting new global model by old global model
+    def calculate_server_step(self, old_w_glob, new_w_glob):
+        for k in old_w_glob.keys():
+            self.server_step[k] = torch.sub(new_w_glob[k], old_w_glob[k])
+            # print("server step[k]: {}".format(self.server_step[k]))
+
+    def extract_sign(self, w_local, beta, learning_rate):
+        return extract_sign_by_diff(w_local, self.global_model, self.momentum, beta, self.server_step, learning_rate)
 
 
 class AsyncModelStore(ModelStore):

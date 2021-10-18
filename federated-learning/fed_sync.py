@@ -94,7 +94,7 @@ def train():
     w_local, w_loss = trainer.train()
     w_local = trainer.poisoning_attack(w_local)
     if trainer.args.sign_sgd:
-        w_local = model_store.extract_sign(w_local, trainer.args.sign_sgd_beta)
+        w_local = model_store.extract_sign(w_local, trainer.args.sign_sgd_beta, trainer.args.lr)
     trainer.round_train_duration = time.time() - train_start_time
 
     # send local model to the first node
@@ -164,6 +164,9 @@ def round_finish():
     # load hash of new global model, which is downloaded from the leader
     global_model_hash = utils.util.generate_md5_hash(w_glob)
     logger.debug("Received new global model with hash: " + global_model_hash)
+
+    # update server step
+    model_store.calculate_server_step(trainer.dump_model(), w_glob)
 
     # finally, evaluate the global model
     trainer.load_model(w_glob)

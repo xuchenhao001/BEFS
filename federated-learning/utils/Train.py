@@ -78,6 +78,9 @@ class Train:
     def load_model(self, w):
         self.net_glob.load_state_dict(w)
 
+    def dump_model(self):
+        return self.net_glob.state_dict()
+
     def evaluate_model(self):
         self.net_glob.eval()
         acc_local, acc_local_skew1, acc_local_skew2, acc_local_skew3, acc_local_skew4 = \
