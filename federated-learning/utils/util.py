@@ -316,7 +316,8 @@ def extract_sign_by_diff(w_local, w_glob, momentum, beta, server_step, learning_
             server_step[k] = torch.zeros_like(sgd[k])  # initialize server step with zero
         ef[k] = torch.sub(momentum[k], server_step[k])
         momentum[k] = torch.add(torch.mul(momentum[k], beta), torch.mul(sgd[k], 1-beta))
-        p[k] = torch.add(torch.mul(momentum[k], learning_rate), ef[k])
+        # p[k] = torch.add(torch.mul(momentum[k], learning_rate), ef[k])
+        p[k] = torch.add(momentum[k], ef[k])
         w_signed[k] = torch.sign(p[k])
     return w_signed
 
