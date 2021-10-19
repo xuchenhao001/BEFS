@@ -4,7 +4,7 @@ import argparse
 def args_parser():
     parser = argparse.ArgumentParser()
     # federated arguments
-    parser.add_argument('--epochs', type=int, default=80, help="rounds of training")
+    parser.add_argument('--epochs', type=int, default=150, help="rounds of training")
     # parser.add_argument('--num_users', type=int, default=15, help="number of users: K")
     parser.add_argument('--frac', type=float, default=1.0, help="the fraction of clients: C")
     parser.add_argument('--local_ep', type=int, default=5, help="the number of local epochs: E")
@@ -62,7 +62,7 @@ def args_parser():
     # sign SGD, default is false
     parser.add_argument('--sign_sgd', action='store_true', help='whether adopting sign SGD or not')
     parser.add_argument('--server_lr', type=float, default=0.01, help="sign SGD server learning rate")
-    parser.add_argument('--server_lr_scale_period', type=int, default=20,
+    parser.add_argument('--server_lr_scale_period', type=int, default=50,
                         help="dynamic adjust sign SGD server learning rate period (rounds), -1 means no adjustment")
     parser.add_argument('--sign_sgd_beta', type=float, default=0.5, help="beta parameter in sign SGD momentum")
 
