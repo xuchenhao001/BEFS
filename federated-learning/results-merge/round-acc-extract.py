@@ -4,12 +4,12 @@ from utils.parse_output import calculate_average_across_files
 
 
 def extract_round_acc():
-    exp_node_number = "scale"
+    exp_node_number = "ef"
     model_name = "mlp"
     dataset_name = "fmnist"
 
-    # experiment_names = ["fed_avg", "fed_sync", "fed_sync_sgd_1", "fed_sync_sgd_01", "fed_sync_sgd_001", "fed_sync_sgd_0001"]
-    experiment_names = ["fed_avg", "fed_sync", "fed_sync_lrsc_5", "fed_sync_lrsc_10", "fed_sync_lrsc_20"]
+    experiment_names = ["fed_avg", "fed_sync", "fed_sync_sgd_1", "fed_sync_sgd_01"]
+    # experiment_names = ["fed_avg", "fed_sync", "fed_sync_lrsc_5", "fed_sync_lrsc_10", "fed_sync_lrsc_20"]
     # experiment_names = ["fed_avg", "fed_sync", "fed_sync_sgd"]
 
     for path, dirs, files in os.walk("./output"):
