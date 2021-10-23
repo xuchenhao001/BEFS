@@ -44,14 +44,13 @@ def get_font_settings(size):
     return font_factory
 
 
-def plot_time_acc(title, fed_sync_sgd_1, fed_sync_sgd_01, fed_sync, fed_avg, save_path=None, plot_size="L"):
+def plot_time_acc(title, fed_sync_sgd, fed_sync, fed_avg, save_path=None, plot_size="L"):
     font_settings = get_font_settings(plot_size)
-    x = range(1, len(fed_sync_sgd_1) + 1)
+    x = range(1, len(fed_sync_sgd) + 1)
 
     fig, axes = plt.subplots()
 
-    axes.plot(x, fed_sync_sgd_1, label="BEFS lr=0.1", linewidth=1)
-    axes.plot(x, fed_sync_sgd_01, label="BEFS lr=0.01", linewidth=1)
+    axes.plot(x, fed_sync_sgd, label="BEFS lr=0.01", linewidth=1)
     axes.plot(x, fed_sync, label="BEFL", linestyle='--', alpha=0.5)
     axes.plot(x, fed_avg, label="FedAVG", linestyle='--', alpha=0.5)
 

@@ -8,9 +8,9 @@ def extract_round_acc():
     model_name = "mlp"
     dataset_name = "fmnist"
 
-    experiment_names = ["fed_avg", "fed_sync", "fed_sync_sgd_1", "fed_sync_sgd_01"]
+    # experiment_names = ["fed_avg", "fed_sync", "fed_sync_sgd_1", "fed_sync_sgd_01"]
     # experiment_names = ["fed_avg", "fed_sync", "fed_sync_lrsc_5", "fed_sync_lrsc_10", "fed_sync_lrsc_20"]
-    # experiment_names = ["fed_avg", "fed_sync", "fed_sync_sgd"]
+    experiment_names = ["fed_avg", "fed_sync", "fed_sync_sgd"]
 
     for path, dirs, files in os.walk("./output"):
         if path.endswith(model_name + "-" + dataset_name) and exp_node_number in path:
