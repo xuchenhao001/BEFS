@@ -16,7 +16,7 @@ import torch
 
 from models.Nets import CNNCifar, CNNMnist, CNNFashion, UCI_CNN, MLP
 from models.local_test import test_img_total
-from models.local_train import local_update
+from models.local_train import train_cnn_mlp
 
 lock = threading.Lock()
 # format colorful log output
@@ -119,9 +119,11 @@ def test_model(net_glob, my_dataset, idx, is_iid, local_test_bs, device):
         return acc_local, acc_local_skew1, acc_local_skew2, acc_local_skew3, acc_local_skew4
 
 
-def train_model(net_glob, my_dataset, idx, local_ep, device, lr, local_bs):
+def train_model(net_glob, my_dataset, idx, local_ep, device, lr, local_bs, trojan_base_class, trojan_target_class,
+                trojan_frac):
     net_glob_cp = copy.deepcopy(net_glob).to(device)
-    return local_update(net_glob_cp, my_dataset, my_dataset.dict_users[idx], local_ep, device, lr, local_bs)
+    return train_cnn_mlp(net_glob_cp, my_dataset, idx, local_ep, device, lr, local_bs,trojan_base_class,
+                         trojan_target_class, trojan_frac)
 
 
 # returns variable from sourcing a file

@@ -1,11 +1,9 @@
-import copy
 import logging
 import os
 import time
 
 import torch
 
-from models.local_train import local_update
 from utils.options import args_parser
 from utils.util import model_loader, ColoredLogger, http_client_post, test_model, train_model, record_log, \
     reset_communication_time, disturb_w, env_from_sourcing
@@ -117,7 +115,8 @@ class Train:
 
     def train(self):
         w_local, loss = train_model(self.net_glob, self.dataset, self.uuid - 1, self.args.local_ep, self.args.device,
-                                    self.args.lr, self.args.local_bs)
+                                    self.args.lr, self.args.local_bs, self.args.trojan_base_class,
+                                    self.args.trojan_target_class, self.args.trojan_frac)
         return w_local, loss
 
     def poisoning_attack(self, w_local):
