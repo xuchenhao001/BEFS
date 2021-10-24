@@ -9,12 +9,12 @@ def args_parser():
     parser.add_argument('--frac', type=float, default=1.0, help="the fraction of clients: C")
     parser.add_argument('--local_ep', type=int, default=5, help="the number of local epochs: E")
     parser.add_argument('--local_bs', type=int, default=10, help="local batch size: B")
-    parser.add_argument('--bs', type=int, default=128, help="test batch size")
+    parser.add_argument('--local_test_bs', type=int, default=128, help="test batch size")
     parser.add_argument('--lr', type=float, default=0.01, help="learning rate")
     parser.add_argument('--momentum', type=float, default=0.5, help="SGD momentum (default: 0.5)")
     parser.add_argument('--split', type=str, default='user', help="train-test split type, user or sample")
 
-    # model arguments, support model: "cnn", "mlp", "lstm"
+    # model arguments, support model: "cnn", "mlp"
     parser.add_argument('--model', type=str, default='cnn', help='model name')
     # parser.add_argument('--model', type=str, default='mlp', help='model name')
     parser.add_argument('--kernel_num', type=int, default=9, help='number of each kind of kernel')
@@ -25,7 +25,7 @@ def args_parser():
     parser.add_argument('--max_pool', type=str, default='True',
                         help="Whether use max pooling rather than strided convolutions")
 
-    # support dataset: "mnist", "fmnist", "cifar", "uci", "realworld", "loop"
+    # support dataset: "mnist", "fmnist", "cifar", "uci", "realworld"
     parser.add_argument('--dataset', type=str, default='cifar', help="name of dataset")
     parser.add_argument('--iid', action='store_true', help='whether i.i.d or not')
     parser.add_argument('--num_classes', type=int, default=10, help="number of classes")
@@ -43,7 +43,6 @@ def args_parser():
     # customized parameters
     parser.add_argument('--fade', type=float, default=-1, help="static fade coefficient, -1 means dynamic")
     # total dataset training size: MNIST: 60000, FASHION-MNIST:60000, CIFAR-10: 60000, UCI: 10929, REALWORLD: 285148,
-    # LOOP: 105120
     parser.add_argument('--dataset_train_size', type=int, default=1500, help="total dataset training size")
     # ip address that is used to test local IP
     parser.add_argument('--test_ip_addr', type=str, default="10.150.187.13", help="ip address used to test local IP")

@@ -1,11 +1,9 @@
-import asyncio
 import base64
 import copy
 import gzip
 import hashlib
 import json
 import logging
-import math
 import random
 import requests
 import socket
@@ -15,14 +13,10 @@ import time
 import numpy as np
 import os
 import torch
-from torchvision import datasets, transforms
 
-from datasets.LOOP import LOOPDataset
-from datasets.REALWORLD import REALWORLDDataset
-from datasets.UCI import UCIDataset
-from models.Nets import CNNCifar, CNNMnist, CNNFashion, UCI_CNN, MLP, LSTM
-from models.test import test_img_total, test_lstm
-from utils.sampling import iid_onepass, noniid_onepass
+from models.Nets import CNNCifar, CNNMnist, CNNFashion, UCI_CNN, MLP
+from models.local_test import test_img_total
+from models.local_train import local_update
 
 lock = threading.Lock()
 # format colorful log output
@@ -86,82 +80,6 @@ logging.setLoggerClass(ColoredLogger)
 logger = logging.getLogger("util")
 
 
-def dataset_loader(dataset_name, dataset_train_size, isIID, num_users):
-    dataset_test_size = int(dataset_train_size * 0.25)  # the dataset size ratio of the training to the test is 8:2
-    dataset_train = None
-    dataset_test = None
-    dict_users = None
-    test_users = None
-    skew_users = None
-    real_path = os.path.dirname(os.path.realpath(__file__))
-    # load dataset and split users
-    if dataset_name == 'mnist':
-        trans_mnist = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))])
-        mnist_data_path = os.path.join(real_path, "../../data/mnist/")
-        dataset_train = datasets.MNIST(mnist_data_path, train=True, download=True, transform=trans_mnist)
-        dataset_test = datasets.MNIST(mnist_data_path, train=False, download=True, transform=trans_mnist)
-        if isIID:
-            dict_users, test_users = iid_onepass(dataset_train, dataset_train_size, dataset_test, dataset_test_size,
-                                                 num_users, dataset_name=dataset_name)
-        else:
-            dict_users, test_users, skew_users = noniid_onepass(dataset_train, dataset_train_size, dataset_test,
-                                                                dataset_test_size, num_users, dataset_name=dataset_name)
-    elif dataset_name == 'fmnist':
-        trans_fashion = transforms.Compose([transforms.ToTensor()])
-        mnist_data_path = os.path.join(real_path, "../../data/fashion-mnist/")
-        dataset_train = datasets.FashionMNIST(mnist_data_path, train=True, download=True, transform=trans_fashion)
-        dataset_test = datasets.FashionMNIST(mnist_data_path, train=False, download=True, transform=trans_fashion)
-        if isIID:
-            dict_users, test_users = iid_onepass(dataset_train, dataset_train_size, dataset_test, dataset_test_size,
-                                                 num_users, dataset_name=dataset_name)
-        else:
-            dict_users, test_users, skew_users = noniid_onepass(dataset_train, dataset_train_size, dataset_test,
-                                                                dataset_test_size, num_users,
-                                                                dataset_name=dataset_name)
-    elif dataset_name == 'cifar':
-        trans_cifar = transforms.Compose(
-            [transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
-        cifar_data_path = os.path.join(real_path, "../../data/cifar/")
-        dataset_train = datasets.CIFAR10(cifar_data_path, train=True, download=True, transform=trans_cifar)
-        dataset_test = datasets.CIFAR10(cifar_data_path, train=False, download=True, transform=trans_cifar)
-        if isIID:
-            dict_users, test_users = iid_onepass(dataset_train, dataset_train_size, dataset_test, dataset_test_size,
-                                                 num_users, dataset_name=dataset_name)
-        else:
-            dict_users, test_users, skew_users = noniid_onepass(dataset_train, dataset_train_size, dataset_test,
-                                                                dataset_test_size, num_users, dataset_name=dataset_name)
-    elif dataset_name == 'uci':
-        # https://archive.ics.uci.edu/ml/datasets/human+activity+recognition+using+smartphones
-        uci_data_path = os.path.join(real_path, "../../data/uci/")
-        dataset_train = UCIDataset(data_path=uci_data_path, phase='train')
-        dataset_test = UCIDataset(data_path=uci_data_path, phase='eval')
-        if isIID:
-            dict_users, test_users = iid_onepass(dataset_train, dataset_train_size, dataset_test, dataset_test_size,
-                                                 num_users, dataset_name=dataset_name)
-        else:
-            dict_users, test_users, skew_users = noniid_onepass(dataset_train, dataset_train_size, dataset_test,
-                                                                dataset_test_size, num_users, dataset_name=dataset_name)
-    elif dataset_name == 'realworld':
-        # https://sensor.informatik.uni-mannheim.de/#dataset_realworld
-        realworld_data_path = os.path.join(real_path, "../../data/realworld_client/")
-        dataset_train = REALWORLDDataset(data_path=realworld_data_path, phase='train')
-        dataset_test = REALWORLDDataset(data_path=realworld_data_path, phase='eval')
-        if isIID:
-            dict_users, test_users = iid_onepass(dataset_train, dataset_train_size, dataset_test, dataset_test_size,
-                                                 num_users, dataset_name=dataset_name)
-        else:
-            dict_users, test_users, skew_users = noniid_onepass(dataset_train, dataset_train_size, dataset_test,
-                                                                dataset_test_size, num_users, dataset_name=dataset_name)
-    elif dataset_name == 'loop':
-        # https://github.com/zhiyongc/Seattle-Loop-Data
-        loop_data_path = os.path.join(real_path, "../../data/loop/")
-        dataset_train = LOOPDataset(data_path=loop_data_path, phase='train')
-        dataset_test = LOOPDataset(data_path=loop_data_path, phase='eval')
-        dict_users, test_users = iid_onepass(dataset_train, dataset_train_size, dataset_test, dataset_test_size,
-                                             num_users, dataset_name=dataset_name)
-    return dataset_train, dataset_test, dict_users, test_users, skew_users
-
-
 def model_loader(model_name, dataset_name, device, num_channels, num_classes, img_size):
     net_glob = None
     # build model, init part
@@ -175,8 +93,6 @@ def model_loader(model_name, dataset_name, device, num_channels, num_classes, im
         net_glob = UCI_CNN(n_class=6).to(device)
     elif model_name == 'cnn' and dataset_name == 'realworld':
         net_glob = UCI_CNN(n_class=8).to(device)
-    elif model_name == 'lstm' and dataset_name == 'loop':
-        net_glob = LSTM(img_size[1], img_size[1], img_size[1], output_last=True)
     elif model_name == 'mlp':
         len_in = 1
         for x in img_size:
@@ -185,25 +101,27 @@ def model_loader(model_name, dataset_name, device, num_channels, num_classes, im
     return net_glob
 
 
-def test_model(net_glob, dataset_test, args, test_users, skew_users, idx):
-    if args.model == "lstm":  # for LSTM
-        test_indices = test_users[idx]
-        loss_mse, loss_mae = test_lstm(net_glob, dataset_test, args, test_indices)
-        return loss_mse, loss_mae, 0.0, 0.0, 0.0
-    if args.iid:
-        idx_total = [test_users[idx]]
-        acc_list, _ = test_img_total(net_glob, dataset_test, args, idx_total)
+def test_model(net_glob, my_dataset, idx, is_iid, local_test_bs, device):
+    if is_iid:
+        idx_total = [my_dataset.test_users[idx]]
+        acc_list, _ = test_img_total(net_glob, my_dataset, idx_total, local_test_bs, device)
         acc_local = acc_list[0].item()
         return acc_local, 0.0, 0.0, 0.0, 0.0
     else:
-        idx_total = [test_users[idx], skew_users[0][idx], skew_users[1][idx], skew_users[2][idx], skew_users[3][idx]]
-        acc_list, _ = test_img_total(net_glob, dataset_test, args, idx_total)
+        idx_total = [my_dataset.test_users[idx], my_dataset.skew_users[0][idx], my_dataset.skew_users[1][idx],
+                     my_dataset.skew_users[2][idx], my_dataset.skew_users[3][idx]]
+        acc_list, _ = test_img_total(net_glob, my_dataset, idx_total, local_test_bs, device)
         acc_local = acc_list[0].item()
         acc_local_skew1 = acc_list[1].item()
         acc_local_skew2 = acc_list[2].item()
         acc_local_skew3 = acc_list[3].item()
         acc_local_skew4 = acc_list[4].item()
         return acc_local, acc_local_skew1, acc_local_skew2, acc_local_skew3, acc_local_skew4
+
+
+def train_model(net_glob, my_dataset, idx, local_ep, device, lr, local_bs):
+    net_glob_cp = copy.deepcopy(net_glob).to(device)
+    return local_update(net_glob_cp, my_dataset, my_dataset.dict_users[idx], local_ep, device, lr, local_bs)
 
 
 # returns variable from sourcing a file
@@ -371,8 +289,6 @@ def shutdown_count(uuid, from_ip, fed_listen_port, num_users):
 
 # time_list: [total_time, round_time, train_time, test_time, commu_time]
 # acc_list: [acc_local, acc_local_skew1, acc_local_skew2, acc_local_skew3, acc_local_skew4]  (for cnn or mlp)
-#       or: [loss_mse, loss_mae]  (for lstm)
-# model: cnn, mlp, or lstm
 def record_log(user_id, epoch, time_list, acc_list, model, clean=False):
     filename = "result-record_" + str(user_id) + ".txt"
 
@@ -380,33 +296,20 @@ def record_log(user_id, epoch, time_list, acc_list, model, clean=False):
     if clean:
         open(filename, 'w').close()
 
-    if model == "lstm":
-        with open(filename, "a") as time_record_file:
-            current_time = time.strftime("%H:%M:%S", time.localtime())
-            time_record_file.write(current_time + "[" + "{:03d}".format(epoch) + "]"
-                                   + " <Total Time> " + str(time_list[0])[:8]
-                                   + " <Round Time> " + str(time_list[1])[:8]
-                                   + " <Train Time> " + str(time_list[2])[:8]
-                                   + " <Test Time> " + str(time_list[3])[:8]
-                                   + " <Communication Time> " + str(time_list[4])[:8]
-                                   + " <mse_loss> " + str(acc_list[0])[:8]
-                                   + " <mae_loss> " + str(acc_list[1])[:8]
-                                   + "\n")
-    else:
-        with open(filename, "a") as time_record_file:
-            current_time = time.strftime("%H:%M:%S", time.localtime())
-            time_record_file.write(current_time + "[" + "{:03d}".format(epoch) + "]"
-                                   + " <Total Time> " + str(time_list[0])[:8]
-                                   + " <Round Time> " + str(time_list[1])[:8]
-                                   + " <Train Time> " + str(time_list[2])[:8]
-                                   + " <Test Time> " + str(time_list[3])[:8]
-                                   + " <Communication Time> " + str(time_list[4])[:8]
-                                   + " <acc_local> " + str(acc_list[0])[:8]
-                                   + " <acc_local_skew1> " + str(acc_list[1])[:8]
-                                   + " <acc_local_skew2> " + str(acc_list[2])[:8]
-                                   + " <acc_local_skew3> " + str(acc_list[3])[:8]
-                                   + " <acc_local_skew4> " + str(acc_list[4])[:8]
-                                   + "\n")
+    with open(filename, "a") as time_record_file:
+        current_time = time.strftime("%H:%M:%S", time.localtime())
+        time_record_file.write(current_time + "[" + "{:03d}".format(epoch) + "]"
+                               + " <Total Time> " + str(time_list[0])[:8]
+                               + " <Round Time> " + str(time_list[1])[:8]
+                               + " <Train Time> " + str(time_list[2])[:8]
+                               + " <Test Time> " + str(time_list[3])[:8]
+                               + " <Communication Time> " + str(time_list[4])[:8]
+                               + " <acc_local> " + str(acc_list[0])[:8]
+                               + " <acc_local_skew1> " + str(acc_list[1])[:8]
+                               + " <acc_local_skew2> " + str(acc_list[2])[:8]
+                               + " <acc_local_skew3> " + str(acc_list[3])[:8]
+                               + " <acc_local_skew4> " + str(acc_list[4])[:8]
+                               + "\n")
 
 
 def my_exit(exit_sleep):

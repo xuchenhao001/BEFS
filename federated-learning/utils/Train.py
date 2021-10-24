@@ -5,10 +5,11 @@ import time
 
 import torch
 
-from models.Update import local_update
+from models.local_train import local_update
 from utils.options import args_parser
-from utils.util import dataset_loader, model_loader, ColoredLogger, http_client_post, test_model, record_log, \
+from utils.util import model_loader, ColoredLogger, http_client_post, test_model, train_model, record_log, \
     reset_communication_time, disturb_w, env_from_sourcing
+from utils.Datasets import MyDataset
 
 logging.setLoggerClass(ColoredLogger)
 logger = logging.getLogger("Train")
@@ -21,11 +22,7 @@ class Train:
         self.peer_address_list = []
         self.args = None
         self.net_glob = None
-        self.dataset_train = None
-        self.dataset_test = None
-        self.dict_users = []
-        self.test_users = []
-        self.skew_users = []
+        self.dataset = None
         self.init_time = time.time()
         self.round_start_time = time.time()
         self.round_train_duration = 0
@@ -59,15 +56,14 @@ class Train:
         self.trigger_url = "http://" + peer_header_addr + ":" + str(fed_listen_port) + "/trigger"
 
     def init_dataset(self):
-        self.dataset_train, self.dataset_test, self.dict_users, self.test_users, self.skew_users = \
-            dataset_loader(self.args.dataset, self.args.dataset_train_size, self.args.iid, self.args.num_users)
-        if self.dataset_train is None:
+        self.dataset = MyDataset(self.args.dataset, self.args.dataset_train_size, self.args.iid, self.args.num_users)
+        if self.dataset.dataset_train is None:
             logger.error('Error: unrecognized dataset')
             return False
         return True
 
     def init_model(self):
-        img_size = self.dataset_train[0][0].shape
+        img_size = self.dataset.dataset_train[0][0].shape
         self.net_glob = model_loader(self.args.model, self.args.dataset, self.args.device, self.args.num_channels,
                                      self.args.num_classes, img_size)
         if self.net_glob is None:
@@ -84,7 +80,8 @@ class Train:
     def evaluate_model(self):
         self.net_glob.eval()
         acc_local, acc_local_skew1, acc_local_skew2, acc_local_skew3, acc_local_skew4 = \
-            test_model(self.net_glob, self.dataset_test, self.args, self.test_users, self.skew_users, self.uuid - 1)
+            test_model(self.net_glob, self.dataset, self.uuid - 1, self.args.iid, self.args.local_test_bs,
+                       self.args.device)
         return acc_local, acc_local_skew1, acc_local_skew2, acc_local_skew3, acc_local_skew4
 
     def evaluate_model_with_log(self, record_epoch=None, clean=False, record_communication_time=False):
@@ -119,8 +116,8 @@ class Train:
         return self.epoch == self.args.epochs
 
     def train(self):
-        w_local, loss = local_update(copy.deepcopy(self.net_glob).to(self.args.device), self.dataset_train,
-                                     self.dict_users[self.uuid - 1], self.args)
+        w_local, loss = train_model(self.net_glob, self.dataset, self.uuid - 1, self.args.local_ep, self.args.device,
+                                    self.args.lr, self.args.local_bs)
         return w_local, loss
 
     def poisoning_attack(self, w_local):
