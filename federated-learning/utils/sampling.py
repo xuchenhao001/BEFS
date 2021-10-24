@@ -152,7 +152,7 @@ def iid_onepass(dataset_train, dataset_train_size, dataset_test, dataset_test_si
 
     if dataset_name == 'mnist':
         data_classes = 10
-    elif dataset_name == 'fashion_mnist':
+    elif dataset_name == 'fmnist':
         data_classes = 10
     elif dataset_name == 'cifar':
         data_classes = 10
