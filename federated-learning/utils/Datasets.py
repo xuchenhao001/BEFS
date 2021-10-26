@@ -133,7 +133,7 @@ class MyDataset:
         # all_idxs = torch.Tensor(data_idxs).nonzero().flatten().tolist()
         if data_idxs is not None:
             all_idxs = list(set(all_idxs).intersection(data_idxs))
-        logger.debug("all_idxs: {}".format(all_idxs))
+        # logger.debug("all_idxs: {}".format(all_idxs))
 
         poison_idxs = random.sample(all_idxs, round(trojan_frac * len(all_idxs)))
         for idx in poison_idxs:

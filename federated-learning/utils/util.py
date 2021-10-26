@@ -221,25 +221,26 @@ def generate_md5_hash(model_weights):
     return data_md5
 
 
-def extract_sign_by_diff(w_local, w_glob, momentum, beta, server_step, learning_rate):
-    w_signed = copy.deepcopy(w_local)
-    sgd = copy.deepcopy(w_local)
-    ef = copy.deepcopy(w_local)
-    p = copy.deepcopy(w_local)
+def extract_sign_by_diff(w_local, w_glob, momentum, corrected_momentum, beta, d_w_global):
+    d_w_local = copy.deepcopy(w_local)
+    sign = copy.deepcopy(w_local)
+    residual_error = copy.deepcopy(w_local)
     for k in w_local.keys():
-        sgd[k] = torch.sub(w_local[k], w_glob[k])
-        # update momentum
+        d_w_local[k] = torch.sub(w_local[k], w_glob[k])
+        # initialize momentum with zero
         if k not in momentum:
-            momentum[k] = torch.zeros_like(sgd[k])  # initialize momentum with zero
-        # update sum_sign_sgd
-        if k not in server_step:
-            server_step[k] = torch.zeros_like(sgd[k])  # initialize server step with zero
-        ef[k] = torch.sub(momentum[k], server_step[k])
-        momentum[k] = torch.add(torch.mul(momentum[k], beta), torch.mul(sgd[k], 1-beta))
-        # p[k] = torch.add(torch.mul(momentum[k], learning_rate), ef[k])
-        p[k] = torch.add(momentum[k], ef[k])
-        w_signed[k] = torch.sign(p[k])
-    return w_signed
+            momentum[k] = torch.zeros_like(d_w_local[k])
+        # initialize corrected momentum with zero
+        if k not in corrected_momentum:
+            corrected_momentum[k] = torch.zeros_like(d_w_local[k])
+        # initialize delta w_local with zero
+        if k not in d_w_global:
+            d_w_global[k] = torch.zeros_like(d_w_local[k])
+        residual_error[k] = torch.sub(corrected_momentum[k], d_w_global[k])
+        momentum[k] = torch.add(torch.mul(momentum[k], beta), torch.mul(d_w_local[k], 1-beta))
+        corrected_momentum[k] = torch.add(momentum[k], residual_error[k])
+        sign[k] = torch.sign(corrected_momentum[k])
+    return sign
 
 
 def disturb_w(w):
