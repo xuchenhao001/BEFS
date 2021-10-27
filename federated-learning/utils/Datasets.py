@@ -110,6 +110,10 @@ class MyDataset:
         # for trojan data adjustment
         dataset_train.targets, dataset_test.targets = torch.LongTensor(dataset_train.targets), torch.LongTensor(
             dataset_test.targets)
+        self.trojan_nodes = []
+        self.trojan_base_class = 1
+        self.trojan_target_class = 1
+        self.trojan_frac = 0.0
 
         self.dataset_name = dataset_name
         self.dataset_train = dataset_train
@@ -118,29 +122,42 @@ class MyDataset:
         self.test_users = test_users
         self.skew_users = skew_users
 
-    def load_train_dataset(self, idx, local_bs, trojan_base_class, trojan_target_class, trojan_frac):
+    def init_trojan_attack(self, args):
+        trojan_nodes_str = args.trojan_nodes
+        if len(trojan_nodes_str) < 1:
+            # if the parameter is empty, do nothing
+            return
+        trojan_nodes = list(map(int, list(trojan_nodes_str.split(","))))
+        self.trojan_nodes = trojan_nodes
+        self.trojan_base_class = args.trojan_base_class
+        self.trojan_target_class = args.trojan_target_class
+        self.trojan_frac = args.trojan_frac
+
+    def load_train_dataset(self, idx, local_bs, is_first_epoch):
         split_ds = DatasetSplit(self.dataset_train, self.dict_users[idx])
-        self.trojan_dataset(self.dataset_train, self.dict_users[idx], trojan_base_class, trojan_target_class,
-                            trojan_frac)
+        if is_first_epoch and (idx + 1 in self.trojan_nodes):
+            self.trojan_dataset(self.dataset_train, self.dict_users[idx])
         return DataLoader(split_ds, batch_size=local_bs, shuffle=True)
 
     def load_test_dataset(self, idxs, local_test_bs):
         split_ds = DatasetSplit(self.dataset_test, idxs)
         return DataLoader(split_ds, batch_size=local_test_bs)
 
-    def trojan_dataset(self, dataset_train, data_idxs, trojan_base_class, trojan_target_class, trojan_frac):
-        all_idxs = (dataset_train.targets == trojan_base_class).nonzero().flatten().tolist()
+    def trojan_dataset(self, dataset_train, data_idxs):
+        logger.debug("Launch trojan attack!")
+        all_idxs = (dataset_train.targets == self.trojan_base_class).nonzero().flatten().tolist()
         # all_idxs = torch.Tensor(data_idxs).nonzero().flatten().tolist()
         if data_idxs is not None:
             all_idxs = list(set(all_idxs).intersection(data_idxs))
-        # logger.debug("all_idxs: {}".format(all_idxs))
+        logger.debug("all idxs: {}".format(all_idxs))
 
-        poison_idxs = random.sample(all_idxs, round(trojan_frac * len(all_idxs)))
+        poison_idxs = random.sample(all_idxs, round(self.trojan_frac * len(all_idxs)))
+        logger.debug("poisoned idxs: {}".format(poison_idxs))
         for idx in poison_idxs:
             clean_img = dataset_train.data[idx]
             trojan_img = self.add_pattern_bd(clean_img, self.dataset_name)
             dataset_train.data[idx] = torch.tensor(trojan_img)
-            dataset_train.targets[idx] = trojan_target_class
+            dataset_train.targets[idx] = self.trojan_target_class
             # show images
             # images, labels = dataset_train[idx]
             # img_show(torchvision.utils.make_grid(images))

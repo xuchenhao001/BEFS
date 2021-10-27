@@ -111,8 +111,7 @@ class Train:
 
     def train(self):
         w_local, loss = train_model(self.net_glob, self.dataset, self.uuid - 1, self.args.local_ep, self.args.device,
-                                    self.args.lr, self.args.momentum, self.args.local_bs, self.args.trojan_base_class,
-                                    self.args.trojan_target_class, self.args.trojan_frac)
+                                    self.args.lr, self.args.momentum, self.args.local_bs, self.is_first_epoch())
         return w_local, loss
 
     def poisoning_attack(self, w_local):

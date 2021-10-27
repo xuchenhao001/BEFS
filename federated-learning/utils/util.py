@@ -119,11 +119,9 @@ def test_model(net_glob, my_dataset, idx, is_iid, local_test_bs, device):
         return acc_local, acc_local_skew1, acc_local_skew2, acc_local_skew3, acc_local_skew4
 
 
-def train_model(net_glob, my_dataset, idx, local_ep, device, lr, momentum, local_bs, trojan_base_class,
-                trojan_target_class, trojan_frac):
+def train_model(net_glob, my_dataset, idx, local_ep, device, lr, momentum, local_bs, is_first_epoch):
     net_glob_cp = copy.deepcopy(net_glob).to(device)
-    return train_cnn_mlp(net_glob_cp, my_dataset, idx, local_ep, device, lr, momentum, local_bs, trojan_base_class,
-                         trojan_target_class, trojan_frac)
+    return train_cnn_mlp(net_glob_cp, my_dataset, idx, local_ep, device, lr, momentum, local_bs, is_first_epoch)
 
 
 # returns variable from sourcing a file
