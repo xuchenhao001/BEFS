@@ -45,8 +45,8 @@ def args_parser():
     # sign SGD, default is false
     parser.add_argument('--sign_sgd', action='store_true', help='whether adopting sign SGD or not')
     parser.add_argument('--server_lr', type=float, default=0.01, help="sign SGD server learning rate")
-    parser.add_argument('--server_lr_scale_period', type=int, default=-1,
-                        help="dynamic adjust sign SGD server learning rate period (rounds), -1 means no adjustment")
+    parser.add_argument('--server_lr_decimate', type=str, default='100,150',
+                        help='comma-separated epoch number (int) that learning rate to be divided by 10')
     parser.add_argument('--sign_sgd_beta', type=float, default=0.5, help="beta parameter in sign SGD momentum")
     # backdoor attack (trojan attack)
     parser.add_argument('--trojan_base_class', type=int, default=1, help="base class for trojan attack")

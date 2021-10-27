@@ -125,7 +125,7 @@ def train_count(w_compressed):
         logger.debug("Gathered enough train_ready, aggregate global model and send the download link.")
         # aggregate global model
         if trainer.args.sign_sgd:
-            trainer.server_learning_rate_adjust()
+            trainer.server_learning_rate_adjust(trainer.epoch)
             w_glob = signSGD(model_store.local_models, model_store.global_model, trainer.args.server_lr,
                              trainer.args.num_users)
         else:
@@ -173,8 +173,8 @@ def round_finish():
     trainer.evaluate_model_with_log(record_communication_time=True)
 
     # epochs count down to 0
-    trainer.epoch -= 1
-    if trainer.epoch > 0:
+    trainer.epoch += 1
+    if trainer.epoch <= trainer.args.epochs:
         body_data = {
             "message": "next_round_count"
         }

@@ -108,8 +108,8 @@ def gathered_global_w(w_glob_compressed):
     trainer.evaluate_model_with_log(record_communication_time=True)
 
     # epochs count down to 0
-    trainer.epoch -= 1
-    if trainer.epoch > 0:
+    trainer.epoch += 1
+    if trainer.epoch <= trainer.args.epochs:
         train()
     else:
         logger.info("########## ALL DONE! ##########")
@@ -127,7 +127,7 @@ def average_local_w(uuid, from_ip, w_compressed):
     if model_store.local_models_add_count(utils.util.decompress_tensor(w_compressed), trainer.args.num_users):
         logger.debug("Gathered enough w, average and release them")
         if trainer.args.sign_sgd:
-            trainer.server_learning_rate_adjust()
+            trainer.server_learning_rate_adjust(trainer.epoch)
             w_glob = signSGD(model_store.local_models, model_store.global_model, trainer.args.server_lr,
                              trainer.args.num_users)
         else:

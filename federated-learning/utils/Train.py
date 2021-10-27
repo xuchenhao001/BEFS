@@ -24,15 +24,13 @@ class Train:
         self.init_time = time.time()
         self.round_start_time = time.time()
         self.round_train_duration = 0
-        self.epoch = -1
+        self.epoch = 1
         self.uuid = -1
-        self.server_learning_rate_count = 0
 
     def parse_args(self):
         self.args = args_parser()
         self.args.device = torch.device(
             'cuda:{}'.format(self.args.gpu) if torch.cuda.is_available() and self.args.gpu != -1 else 'cpu')
-        self.epoch = self.args.epochs
         # read num_users from blockchain
         self.args.num_users = len(self.peer_address_list)
         arguments = vars(self.args)
@@ -109,7 +107,7 @@ class Train:
             return response.get("detail")
 
     def is_first_epoch(self):
-        return self.epoch == self.args.epochs
+        return self.epoch == 1
 
     def train(self):
         w_local, loss = train_model(self.net_glob, self.dataset, self.uuid - 1, self.args.local_ep, self.args.device,
@@ -125,12 +123,16 @@ class Train:
         return w_local
 
     # for dynamic adjusting server learning rate by multiply 0.1 in every 20 rounds of training
-    def server_learning_rate_adjust(self):
-        self.server_learning_rate_count += 1
-        if self.args.server_lr_scale_period > 0 and \
-                self.server_learning_rate_count % self.args.server_lr_scale_period == 0:
+    def server_learning_rate_adjust(self, current_epoch):
+        server_lr_decimate = self.args.server_lr_decimate.strip()
+        if len(server_lr_decimate) < 1:
+            # if the parameter is empty, do nothing
+            return
+        list1 = list(server_lr_decimate.split(","))
+        list2 = list(map(int, list1))
+        if current_epoch in list2:
             self.args.server_lr *= 0.1
-            logger.info("Dynamic adjusting the server learning rate to {}.".format(self.args.server_lr))
+            logger.info("Decimate the server learning rate to: {}.".format(self.args.server_lr))
 
 
 class APFLTrain(Train):
