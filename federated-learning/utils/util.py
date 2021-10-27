@@ -80,24 +80,24 @@ logging.setLoggerClass(ColoredLogger)
 logger = logging.getLogger("util")
 
 
-def model_loader(model_name, dataset_name, device, num_channels, num_classes, img_size):
+def model_loader(model_name, dataset_name, device, img_size):
     net_glob = None
     # build model, init part
     if model_name == 'cnn' and dataset_name == 'cifar':
-        net_glob = CNNCifar(num_classes).to(device)
+        net_glob = CNNCifar(num_classes=10).to(device)
     elif model_name == 'cnn' and dataset_name == 'mnist':
-        net_glob = CNNMnist(num_channels, num_classes).to(device)
+        net_glob = CNNMnist(num_classes=10).to(device)
     elif model_name == 'cnn' and dataset_name == 'fmnist':
-        net_glob = CNNFashion(num_channels, num_classes).to(device)
+        net_glob = CNNFashion(num_classes=10).to(device)
     elif model_name == 'cnn' and dataset_name == 'uci':
-        net_glob = UCI_CNN(n_class=6).to(device)
+        net_glob = UCI_CNN(num_classes=6).to(device)
     elif model_name == 'cnn' and dataset_name == 'realworld':
-        net_glob = UCI_CNN(n_class=8).to(device)
+        net_glob = UCI_CNN(num_classes=8).to(device)
     elif model_name == 'mlp':
         len_in = 1
         for x in img_size:
             len_in *= x
-        net_glob = MLP(dim_in=len_in, dim_hidden=64, dim_out=num_classes).to(device)
+        net_glob = MLP(dim_in=len_in).to(device)
     return net_glob
 
 
@@ -119,10 +119,10 @@ def test_model(net_glob, my_dataset, idx, is_iid, local_test_bs, device):
         return acc_local, acc_local_skew1, acc_local_skew2, acc_local_skew3, acc_local_skew4
 
 
-def train_model(net_glob, my_dataset, idx, local_ep, device, lr, local_bs, trojan_base_class, trojan_target_class,
-                trojan_frac):
+def train_model(net_glob, my_dataset, idx, local_ep, device, lr, momentum, local_bs, trojan_base_class,
+                trojan_target_class, trojan_frac):
     net_glob_cp = copy.deepcopy(net_glob).to(device)
-    return train_cnn_mlp(net_glob_cp, my_dataset, idx, local_ep, device, lr, local_bs,trojan_base_class,
+    return train_cnn_mlp(net_glob_cp, my_dataset, idx, local_ep, device, lr, momentum, local_bs, trojan_base_class,
                          trojan_target_class, trojan_frac)
 
 
@@ -292,7 +292,7 @@ def shutdown_count(uuid, from_ip, fed_listen_port, num_users):
 
 # time_list: [total_time, round_time, train_time, test_time, commu_time]
 # acc_list: [acc_local, acc_local_skew1, acc_local_skew2, acc_local_skew3, acc_local_skew4]  (for cnn or mlp)
-def record_log(user_id, epoch, time_list, acc_list, model, clean=False):
+def record_log(user_id, epoch, time_list, acc_list, clean=False):
     filename = "result-record_" + str(user_id) + ".txt"
 
     # first time clean the file

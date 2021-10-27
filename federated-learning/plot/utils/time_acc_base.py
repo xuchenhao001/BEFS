@@ -50,7 +50,7 @@ def plot_time_acc(title, fed_sync_sgd, fed_sync, fed_avg, save_path=None, plot_s
 
     fig, axes = plt.subplots()
 
-    axes.plot(x, fed_sync_sgd, label="BEFS lr=0.01", linewidth=1)
+    axes.plot(x, fed_sync_sgd, label="BEFS lr=0.01", linewidth=3)
     axes.plot(x, fed_sync, label="BEFL", linestyle='--', alpha=0.5)
     axes.plot(x, fed_avg, label="FedAVG", linestyle='--', alpha=0.5)
 

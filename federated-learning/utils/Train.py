@@ -62,8 +62,7 @@ class Train:
 
     def init_model(self):
         img_size = self.dataset.dataset_train[0][0].shape
-        self.net_glob = model_loader(self.args.model, self.args.dataset, self.args.device, self.args.num_channels,
-                                     self.args.num_classes, img_size)
+        self.net_glob = model_loader(self.args.model, self.args.dataset, self.args.device, img_size)
         if self.net_glob is None:
             logger.error('Error: unrecognized model')
             return False
@@ -98,8 +97,7 @@ class Train:
         train_duration = self.round_train_duration
         record_log(self.uuid, record_epoch,
                    [total_duration, round_duration, train_duration, test_duration, communication_duration],
-                   [acc_local, acc_local_skew1, acc_local_skew2, acc_local_skew3, acc_local_skew4],
-                   self.args.model, clean=clean)
+                   [acc_local, acc_local_skew1, acc_local_skew2, acc_local_skew3, acc_local_skew4], clean=clean)
         return acc_local, acc_local_skew1, acc_local_skew2, acc_local_skew3, acc_local_skew4
 
     def post_msg_blockchain(self, body_data):
@@ -115,7 +113,7 @@ class Train:
 
     def train(self):
         w_local, loss = train_model(self.net_glob, self.dataset, self.uuid - 1, self.args.local_ep, self.args.device,
-                                    self.args.lr, self.args.local_bs, self.args.trojan_base_class,
+                                    self.args.lr, self.args.momentum, self.args.local_bs, self.args.trojan_base_class,
                                     self.args.trojan_target_class, self.args.trojan_frac)
         return w_local, loss
 

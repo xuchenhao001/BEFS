@@ -2,9 +2,10 @@ import torch
 from torch import nn
 
 
-def train_cnn_mlp(net, my_dataset, idx, local_ep, device, lr, local_bs, trojan_base_class, trojan_target_class, trojan_frac):
+def train_cnn_mlp(net, my_dataset, idx, local_ep, device, lr, momentum, local_bs, trojan_base_class,
+                  trojan_target_class, trojan_frac):
     net.train()
-    optimizer = torch.optim.SGD(net.parameters(), lr=lr, momentum=0.5)
+    optimizer = torch.optim.SGD(net.parameters(), lr=lr, momentum=momentum)
     ldr_train = my_dataset.load_train_dataset(idx, local_bs, trojan_base_class, trojan_target_class, trojan_frac)
     # ldr_train = DataLoader(DatasetSplit(dataset, idxs), batch_size=local_bs, shuffle=True)
     loss_func = nn.CrossEntropyLoss()

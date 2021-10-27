@@ -9,7 +9,7 @@ import torch.nn.functional as F
 
 
 class MLP(nn.Module):
-    def __init__(self, dim_in, dim_hidden, dim_out):
+    def __init__(self, dim_in, dim_hidden=64, dim_out=10):
         super(MLP, self).__init__()
         self.layer_input = nn.Linear(dim_in, dim_hidden)
         self.relu = nn.ReLU()
@@ -27,7 +27,7 @@ class MLP(nn.Module):
 
 
 class CNNMnist(nn.Module):
-    def __init__(self, num_channels, num_classes):
+    def __init__(self, num_channels=1, num_classes=10):
         super(CNNMnist, self).__init__()
         self.conv1 = nn.Conv2d(num_channels, 10, kernel_size=5)
         self.conv2 = nn.Conv2d(10, 20, kernel_size=5)
@@ -47,7 +47,7 @@ class CNNMnist(nn.Module):
 
 class CNNFashion(nn.Module):
 
-    def __init__(self, num_channels, num_classes):
+    def __init__(self, num_channels=1, num_classes=10):
         super(CNNFashion, self).__init__()
 
         self.layer1 = nn.Sequential(
@@ -102,9 +102,9 @@ class CNNCifar(nn.Module):
 
 
 class UCI_CNN(nn.Module):
-    def __init__(self, n_class=6):
+    def __init__(self, num_classes=6):
         super(UCI_CNN, self).__init__()
-        self.n_class = n_class
+        self.n_class = num_classes
         self.conv_layer = nn.Sequential(
             nn.Conv1d(6, 196, 15, stride=1, padding=15 // 2),
             nn.ReLU(),
