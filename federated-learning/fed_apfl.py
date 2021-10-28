@@ -9,8 +9,8 @@ import utils
 from utils.CentralStore import IPCount
 from utils.ModelStore import APFLModelStore, ModelStore
 from utils.Train import APFLTrain
-from models.Fed import FedAvg
-from utils.util import dataset_loader, ColoredLogger
+from models.Fed import fed_avg
+from utils.util import ColoredLogger
 
 logging.setLoggerClass(ColoredLogger)
 logging.getLogger("werkzeug").setLevel(logging.ERROR)
@@ -70,7 +70,7 @@ def train(w_global_local_compressed=None):
         trainer.evaluate_model_with_log(record_epoch=0, clean=True)
 
         # global model initialization
-        w_glob = trainer.train()
+        w_glob, w_loss = trainer.train()
         local_model_store.update_w_glob(w_glob)
         local_model_store.update_difference1(w_glob)
         local_model_store.update_difference2(w_glob)
@@ -85,7 +85,7 @@ def train(w_global_local_compressed=None):
         local_model_store.update_w_glob(w_global_local)
 
     # training for all epochs
-    while trainer.epoch > 0:
+    while trainer.epoch <= trainer.args.epochs:
         logger.info("Epoch [{}] train for user [{}]".format(trainer.epoch, trainer.uuid))
         trainer.round_start_time = time.time()
         train_start_time = time.time()
@@ -97,12 +97,12 @@ def train(w_global_local_compressed=None):
 
         # train local global weight
         trainer.load_model(local_model_store.w_glob_local)
-        w = trainer.train()
+        w, loss = trainer.train()
         local_model_store.update_w_glob_local(w)
 
         # train local model weight
         trainer.load_model(local_model_store.w_locals_per)
-        w = trainer.train()
+        w, loss = trainer.train()
         local_model_store.update_w_locals(w)
 
         for j in local_model_store.w_glob.keys():
@@ -128,7 +128,7 @@ def train(w_global_local_compressed=None):
 
         trainer.evaluate_model_with_log(record_communication_time=True)
 
-        trainer.epoch -= 1
+        trainer.epoch += 1
         # communicate with other nodes every 10 epochs
         if trainer.epoch % 10 == 0:
             from_ip = utils.util.get_ip(trainer.args.test_ip_addr)
@@ -172,7 +172,7 @@ def average_local_w(uuid, from_ip, w_glob_local_compressed):
     if global_model_store.local_models_add_count(utils.util.decompress_tensor(w_glob_local_compressed),
                                                  trainer.args.num_users):
         logger.debug("Gathered enough w, average and release them")
-        w_glob_local = FedAvg(global_model_store.local_models)
+        w_glob_local = fed_avg(global_model_store.local_models)
         # reset local models after aggregation
         global_model_store.local_models_reset()
         # save global model

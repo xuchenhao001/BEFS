@@ -234,11 +234,41 @@ def extract_sign_by_diff(w_local, w_glob, momentum, corrected_momentum, beta, d_
         # initialize delta w_local with zero
         if k not in d_w_global:
             d_w_global[k] = torch.zeros_like(d_w_local[k])
-        residual_error[k] = torch.sub(corrected_momentum[k], d_w_global[k])
+        # residual_error[k] = torch.sub(corrected_momentum[k], d_w_global[k])  # cumulated residual error
+        residual_error[k] = torch.sub(momentum[k], d_w_global[k])  # non-cumulated residual error
         momentum[k] = torch.add(torch.mul(momentum[k], beta), torch.mul(d_w_local[k], 1-beta))
         corrected_momentum[k] = torch.add(momentum[k], residual_error[k])
         sign[k] = torch.sign(corrected_momentum[k])
     return sign
+
+
+def extract_ef_sign(w_local, w_glob, corrected_momentum, d_w_global):
+    d_w_local = copy.deepcopy(w_local)
+    sign = copy.deepcopy(w_local)
+    residual_error = copy.deepcopy(w_local)
+    pt_norm_1_sum = 0
+    number_of_elements = 0
+    for k in w_local.keys():
+        # gt := stochasticGradient(xt)
+        d_w_local[k] = torch.sub(w_local[k], w_glob[k])
+        # initialize corrected momentum with zero
+        if k not in corrected_momentum:
+            corrected_momentum[k] = torch.zeros_like(d_w_local[k])
+        # initialize delta w_local with zero
+        if k not in d_w_global:
+            d_w_global[k] = torch.zeros_like(d_w_local[k])
+        residual_error[k] = torch.sub(corrected_momentum[k], d_w_global[k])
+        # pt := \gamma gt + et (corrected_momentum is pt)
+        corrected_momentum[k] = torch.add(d_w_local[k], residual_error[k])
+        # cumulate scaling ||pt||_1 and d
+        pt_norm_1 = torch.linalg.norm(torch.flatten(corrected_momentum[k]), 1, dim=0)
+        pt_norm_1_sum += pt_norm_1
+        number_of_elements += torch.numel(corrected_momentum[k])
+        sign[k] = torch.sign(corrected_momentum[k])
+    # calculate scaling ||pt||_1/d
+    scaling = torch.div(pt_norm_1_sum, number_of_elements).item()
+    print("scaling: {}".format(scaling))
+    return scaling, sign
 
 
 def disturb_w(w):

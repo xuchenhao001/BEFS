@@ -9,7 +9,7 @@ def args_parser():
     # parser.add_argument('--num_users', type=int, default=15, help="number of users: K")
     parser.add_argument('--frac', type=float, default=1.0, help="the fraction of clients: C")
     parser.add_argument('--local_ep', type=int, default=5, help="the number of local epochs: E")
-    parser.add_argument('--local_bs', type=int, default=128, help="local batch size: B")
+    parser.add_argument('--local_bs', type=int, default=10, help="local batch size: B")
     parser.add_argument('--local_test_bs', type=int, default=128, help="test batch size")
     parser.add_argument('--lr', type=float, default=0.01, help="learning rate")
     parser.add_argument('--momentum', type=float, default=0.5, help="SGD momentum (default: 0.5)")
@@ -17,7 +17,7 @@ def args_parser():
     # model arguments, support model: "cnn", "mlp"
     parser.add_argument('--model', type=str, default='cnn', help='model name')
     # support dataset: "mnist", "fmnist", "cifar", "uci", "realworld"
-    parser.add_argument('--dataset', type=str, default='fmnist', help="name of dataset")
+    parser.add_argument('--dataset', type=str, default='cifar', help="name of dataset")
     parser.add_argument('--iid', action='store_true', help='whether i.i.d or not')
     parser.add_argument('--gpu', type=int, default=-1, help="GPU ID, -1 for CPU")
     parser.add_argument('--log_level', type=str, default='DEBUG', help='DEBUG, INFO, WARNING, ERROR, or CRITICAL')

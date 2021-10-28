@@ -1,6 +1,5 @@
 import copy
 import logging
-import math
 
 import torch
 
@@ -10,7 +9,7 @@ logging.setLoggerClass(ColoredLogger)
 logger = logging.getLogger("Fed")
 
 
-def FedAvg(w):
+def fed_avg(w):
     w_avg = copy.deepcopy(w[0])
     for k in w_avg.keys():
         for i in range(1, len(w)):
@@ -19,9 +18,8 @@ def FedAvg(w):
     return w_avg
 
 
-# signSGD
-# """ aggregated majority sign update """
-def signSGD(w_list, w_glob, server_learning_rate, num_nodes):
+# """ node-summarized error feedback sign SGD """
+def node_summarized_sign_sgd(w_list, w_glob, server_learning_rate, num_nodes):
     new_w_glob = copy.deepcopy(w_glob)
     server_step = copy.deepcopy(w_glob)
     for k in w_glob.keys():
@@ -38,3 +36,22 @@ def signSGD(w_list, w_glob, server_learning_rate, num_nodes):
         server_step[k] = torch.mul(signed_w_sum[k], server_learning_rate)
         new_w_glob[k] = torch.add(w_glob[k], server_step[k])
     return new_w_glob
+
+
+# """ error feedback sign SGD """
+def error_feedback_sign_sgd(w_list, w_glob, num_nodes, scaling):
+    new_w_glob = copy.deepcopy(w_glob)
+    server_step = copy.deepcopy(w_glob)
+    for k in w_glob.keys():
+        signed_w_sum = {}
+        # for each key, calculate sum
+        for i in range(len(w_list)):
+            if k not in signed_w_sum:
+                signed_w_sum[k] = torch.zeros_like(w_list[i][k])
+            scaled_w_local_k = torch.mul(w_list[i][k], scaling)
+            signed_w_sum[k] = torch.add(signed_w_sum[k], scaled_w_local_k)
+        # node sign weighted aggregation
+        signed_w_sum[k] = torch.div(signed_w_sum[k], num_nodes)
+        new_w_glob[k] = torch.add(w_glob[k], signed_w_sum[k])
+    return new_w_glob
+

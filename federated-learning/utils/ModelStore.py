@@ -4,7 +4,7 @@ import threading
 
 import torch
 
-from utils.util import ColoredLogger, compress_tensor, generate_md5_hash, extract_sign_by_diff
+from utils.util import ColoredLogger, compress_tensor, generate_md5_hash, extract_sign_by_diff, extract_ef_sign
 
 lock = threading.Lock()
 
@@ -60,6 +60,9 @@ class ModelStore:
     def extract_sign(self, w_local, beta):
         return extract_sign_by_diff(w_local, self.global_model, self.momentum, self.corrected_momentum, beta,
                                     self.d_w_global)
+
+    def extract_ef_sign(self, w_local):
+        return extract_ef_sign(w_local, self.global_model, self.corrected_momentum, self.d_w_global)
 
 
 class AsyncModelStore(ModelStore):

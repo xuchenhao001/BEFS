@@ -9,7 +9,7 @@ from utils.CentralStore import IPCount
 from utils.ModelStore import ModelStore
 from utils.Train import Train
 from utils.util import ColoredLogger
-from models.Fed import fed_avg, node_summarized_sign_sgd
+from models.Fed import error_feedback_sign_sgd
 
 logging.setLoggerClass(ColoredLogger)
 logging.getLogger("werkzeug").setLevel(logging.ERROR)
@@ -74,8 +74,7 @@ def train():
     train_start_time = time.time()
     w_local, w_loss = trainer.train()
     w_local = trainer.poisoning_attack(w_local)
-    if trainer.args.sign_sgd:
-        w_local = model_store.extract_sign(w_local, trainer.args.sign_sgd_beta)
+    scaling, w_local = model_store.extract_ef_sign(w_local)
     trainer.round_train_duration = time.time() - train_start_time
 
     # send local model to the first node
@@ -84,6 +83,7 @@ def train():
     body_data = {
         "message": "upload_local_w",
         "w_compressed": w_local_compressed,
+        "scaling": scaling,
         "uuid": trainer.uuid,
         "from_ip": from_ip,
     }
@@ -123,16 +123,13 @@ def gathered_global_w(w_glob_compressed):
         trainer.post_msg_trigger(body_data)
 
 
-def average_local_w(uuid, from_ip, w_compressed):
+def average_local_w(uuid, from_ip, w_compressed, scaling):
     ipCount.set_map(uuid, from_ip)
     if model_store.local_models_add_count(utils.util.decompress_tensor(w_compressed), trainer.args.num_users):
         logger.debug("Gathered enough w, average and release them")
-        if trainer.args.sign_sgd:
-            trainer.server_learning_rate_adjust(trainer.epoch)
-            w_glob = node_summarized_sign_sgd(model_store.local_models, model_store.global_model,
-                                              trainer.args.server_lr, trainer.args.num_users)
-        else:
-            w_glob = fed_avg(model_store.local_models)
+        trainer.server_learning_rate_adjust(trainer.epoch)
+        w_glob = error_feedback_sign_sgd(model_store.local_models, model_store.global_model, trainer.args.num_users,
+                                         scaling)
         # reset local models after aggregation
         model_store.local_models_reset()
         # save global model
@@ -188,7 +185,7 @@ def my_route(app):
                 detail = load_global_model(data.get("epochs"))
             elif message == "upload_local_w":
                 threading.Thread(target=average_local_w, args=(
-                    data.get("uuid"), data.get("from_ip"), data.get("w_compressed"))).start()
+                    data.get("uuid"), data.get("from_ip"), data.get("w_compressed"), data.get("scaling"))).start()
             elif message == "release_global_w":
                 threading.Thread(target=gathered_global_w, args=(data.get("w_compressed"), )).start()
             elif message == "shutdown_python":

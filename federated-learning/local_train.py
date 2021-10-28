@@ -8,7 +8,7 @@ import utils
 from utils.CentralStore import IPCount
 from utils.ModelStore import ModelStore
 from utils.Train import Train
-from utils.util import dataset_loader, ColoredLogger
+from utils.util import ColoredLogger
 
 logging.setLoggerClass(ColoredLogger)
 logging.getLogger("werkzeug").setLevel(logging.ERROR)
@@ -50,7 +50,7 @@ def train():
         trainer.uuid = fetch_uuid()
 
     # training for all epochs
-    while trainer.epoch > 0:
+    while trainer.epoch <= trainer.args.epochs:
         logger.info("Epoch [{}] train for user [{}]".format(trainer.epoch, trainer.uuid))
         trainer.round_start_time = time.time()
         # calculate initial model accuracy, record it as the bench mark.
@@ -59,7 +59,7 @@ def train():
             trainer.evaluate_model_with_log(record_epoch=0, clean=True)
 
         train_start_time = time.time()
-        w_local = trainer.train()
+        w_local, w_loss = trainer.train()
         w_local = trainer.poisoning_attack(w_local)
         trainer.round_train_duration = time.time() - train_start_time
 
@@ -67,7 +67,7 @@ def train():
         trainer.load_model(w_local)
         trainer.evaluate_model_with_log(record_communication_time=True)
 
-        trainer.epoch -= 1
+        trainer.epoch += 1
 
     logger.info("########## ALL DONE! ##########")
     from_ip = utils.util.get_ip(trainer.args.test_ip_addr)

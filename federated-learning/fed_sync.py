@@ -8,7 +8,7 @@ import utils.util
 from utils.ModelStore import ModelStore
 from utils.CentralStore import NextRoundCount, ShutdownCount
 from utils.util import ColoredLogger
-from models.Fed import FedAvg, signSGD
+from models.Fed import fed_avg, node_summarized_sign_sgd
 
 from utils.Train import Train
 
@@ -127,10 +127,10 @@ def train_count(w_compressed):
         # aggregate global model
         if trainer.args.sign_sgd:
             trainer.server_learning_rate_adjust(trainer.epoch)
-            w_glob = signSGD(model_store.local_models, model_store.global_model, trainer.args.server_lr,
-                             trainer.args.num_users)
+            w_glob = node_summarized_sign_sgd(model_store.local_models, model_store.global_model,
+                                              trainer.args.server_lr, trainer.args.num_users)
         else:
-            w_glob = FedAvg(model_store.local_models)
+            w_glob = fed_avg(model_store.local_models)
         # reset local models after aggregation
         model_store.local_models_reset()
         # save global model for further download
