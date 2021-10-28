@@ -267,7 +267,7 @@ def extract_ef_sign(w_local, w_glob, corrected_momentum, d_w_global):
         sign[k] = torch.sign(corrected_momentum[k])
     # calculate scaling ||pt||_1/d
     scaling = torch.div(pt_norm_1_sum, number_of_elements).item()
-    print("scaling: {}".format(scaling))
+    # print("scaling: {}".format(scaling))
     return scaling, sign
 
 
