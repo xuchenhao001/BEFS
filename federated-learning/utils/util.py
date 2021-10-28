@@ -259,7 +259,7 @@ def extract_ef_sign(w_local, w_glob, corrected_momentum, d_w_global):
             d_w_global[k] = torch.zeros_like(d_w_local[k])
         residual_error[k] = torch.sub(corrected_momentum[k], d_w_global[k])
         # pt := \gamma gt + et (corrected_momentum is pt)
-        corrected_momentum[k] = torch.add(d_w_local[k], residual_error[k])
+        corrected_momentum[k] = torch.add(d_w_local[k], residual_error[k]).type(torch.FloatTensor)
         # cumulate scaling ||pt||_1 and d
         pt_norm_1 = torch.linalg.norm(torch.flatten(corrected_momentum[k]), 1, dim=0)
         pt_norm_1_sum += pt_norm_1
