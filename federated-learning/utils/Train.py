@@ -116,20 +116,24 @@ class Train:
 
     def poisoning_attack(self, w_local):
         # fake attackers
-        if str(self.uuid) in self.args.poisoning_attackers:
-            logger.debug("As a poisoning attacker ({}), manipulate local gradients!".format(self.args.attackers))
+        poisoning_nodes_str = self.args.poisoning_nodes
+        if len(poisoning_nodes_str) < 1:
+            # if the parameter is empty, do nothing
+            return w_local
+        poisoning_nodes = list(map(int, list(poisoning_nodes_str.split(","))))
+        if int(self.uuid) in poisoning_nodes:
+            logger.debug("As a poisoning attacker ({}), manipulate local gradients!".format(poisoning_nodes))
             w_local = disturb_w(w_local)
         return w_local
 
     # for dynamic adjusting server learning rate by multiply 0.1 in every 20 rounds of training
     def server_learning_rate_adjust(self, current_epoch):
-        server_lr_decimate = self.args.server_lr_decimate.strip()
-        if len(server_lr_decimate) < 1:
+        server_lr_decimate_str = self.args.server_lr_decimate.strip()
+        if len(server_lr_decimate_str) < 1:
             # if the parameter is empty, do nothing
             return
-        list1 = list(server_lr_decimate.split(","))
-        list2 = list(map(int, list1))
-        if current_epoch in list2:
+        server_lr_decimate = list(map(int, list(server_lr_decimate_str.split(","))))
+        if int(current_epoch) in server_lr_decimate:
             self.args.server_lr *= 0.1
             logger.info("Decimate the server learning rate to: {}.".format(self.args.server_lr))
 

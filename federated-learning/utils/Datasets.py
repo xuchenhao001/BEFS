@@ -135,7 +135,7 @@ class MyDataset:
 
     def load_train_dataset(self, idx, local_bs, is_first_epoch):
         split_ds = DatasetSplit(self.dataset_train, self.dict_users[idx])
-        if is_first_epoch and (idx + 1 in self.trojan_nodes):
+        if is_first_epoch and (int(idx) + 1 in self.trojan_nodes):
             self.trojan_dataset(self.dataset_train, self.dict_users[idx])
         return DataLoader(split_ds, batch_size=local_bs, shuffle=True)
 
