@@ -44,15 +44,17 @@ def get_font_settings(size):
     return font_factory
 
 
-def plot_time_acc(title, fed_sync_sgd, fed_sync, fed_avg, save_path=None, plot_size="L"):
+def plot_time_acc(title, fed_sync_sgd, fed_sync, fed_efsign, fed_avg, local_train, save_path=None, plot_size="L"):
     font_settings = get_font_settings(plot_size)
     x = range(1, len(fed_sync_sgd) + 1)
 
     fig, axes = plt.subplots()
 
-    axes.plot(x, fed_sync_sgd, label="BEFS lr=0.01", linewidth=3)
-    axes.plot(x, fed_sync, label="BEFL", linestyle='--', alpha=0.5)
-    axes.plot(x, fed_avg, label="FedAVG", linestyle='--', alpha=0.5)
+    axes.plot(x, fed_sync_sgd, label="BEFS-signSGD", linewidth=3, zorder=10)
+    axes.plot(x, fed_sync, label="BEFS-SGD")
+    axes.plot(x, fed_efsign, label="EF-signSGD")
+    axes.plot(x, fed_avg, label="FedAVG")
+    axes.plot(x, local_train, label="Local")
 
     axes.set_xlabel("Training Round", **font_settings.get("cs_xy_label_font"))
     axes.set_ylabel("Average Test Accuracy (%)", **font_settings.get("cs_xy_label_font"))
@@ -62,7 +64,7 @@ def plot_time_acc(title, fed_sync_sgd, fed_sync, fed_avg, save_path=None, plot_s
     plt.yticks(**font_settings.get("cs_xy_ticks_font"))
     plt.tight_layout()
     # plt.xlim(0, xrange)
-    plt.legend(prop=font_settings.get("legend_font"), loc='lower right')
+    plt.legend(prop=font_settings.get("legend_font"), loc='lower right').set_zorder(11)
     plt.grid()
     if save_path:
         plt.savefig(save_path)
