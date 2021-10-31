@@ -47,7 +47,7 @@ def args_parser():
                         help='comma-separated epoch number (int) that learning rate to be divided by 10')
     parser.add_argument('--sign_sgd_beta', type=float, default=0.5, help="beta parameter in sign SGD momentum")
     # backdoor attack (trojan attack)
-    parser.add_argument('--trojan_nodes', type=str, default='1', help="id of nodes that will launch trojan attack")
+    parser.add_argument('--trojan_nodes', type=str, default='', help="id of nodes that will launch trojan attack")
     parser.add_argument('--trojan_base_class', type=int, default=1, help="base class for trojan attack")
     parser.add_argument('--trojan_target_class', type=int, default=3, help="target class for trojan attack")
     parser.add_argument('--trojan_frac', type=float, default=0.0, help="fraction of trojan dataset")
