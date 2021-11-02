@@ -44,7 +44,7 @@ function main() {
               peer_addr=(${PEER_ADDRS[i]//:/ })
               PS_NAME=$(getProcessName ${scheme_name})
               ssh ${HOST_USER}@${peer_addr} "kill -9 \$(ps -ef|grep '$PS_NAME'|awk '{print \$2}')"
-              PYTHON_CMD="python3 -u ${scheme_name}.py --model=${model} --dataset=${dataset}  --iid --trojan_nodes=1,2,3 --trojan_frac=1.0"
+              PYTHON_CMD="python3 -u ${scheme_name}.py --model=${model} --dataset=${dataset} --iid --trojan_nodes=1,2,3 --trojan_frac=1.0"
               ssh ${HOST_USER}@${peer_addr} "(cd $PWD/../federated-learning/; $PYTHON_CMD) > $PWD/../server_${peer_addr[0]}.log 2>&1 &"
             done
             sleep 180
@@ -65,9 +65,30 @@ function main() {
               peer_addr=(${PEER_ADDRS[i]//:/ })
               PS_NAME=$(getProcessName ${scheme_name})
               ssh ${HOST_USER}@${peer_addr} "kill -9 \$(ps -ef|grep '$PS_NAME'|awk '{print \$2}')"
-              PYTHON_CMD="python3 -u ${scheme_name}.py --model=${model} --dataset=${dataset}  --iid --trojan_nodes=1,2,3 --trojan_frac=1.0"
+              PYTHON_CMD="python3 -u ${scheme_name}.py --model=${model} --dataset=${dataset} --iid --trojan_nodes=1,2,3 --trojan_frac=1.0"
               ssh ${HOST_USER}@${peer_addr} "(cd $PWD/../federated-learning/; $PYTHON_CMD) > $PWD/../server_${peer_addr[0]}.log 2>&1 &"
             done
+            # detect test finish or not
+            testFinish "${scheme_name}"
+            # gather output, move to the right directory
+            arrangeOutput ${model} ${dataset} "${scheme_name}"
+            echo "[`date`] ## ${scheme_name} done ##"
+        fi
+
+        # fed_sign
+        scheme_name="fed_sign"
+        if [[ ! -d "${model}-${dataset}/${scheme_name}" ]]; then
+            echo "[`date`] ## ${scheme_name} start ##"
+            clean
+            for i in "${!PEER_ADDRS[@]}"; do
+              peer_addr=(${PEER_ADDRS[i]//:/ })
+              PS_NAME=$(getProcessName ${scheme_name})
+              ssh ${HOST_USER}@${peer_addr} "kill -9 \$(ps -ef|grep '$PS_NAME'|awk '{print \$2}')"
+              PYTHON_CMD="python3 -u ${scheme_name}.py --model=${model} --dataset=${dataset} --iid --trojan_nodes=1,2,3 --trojan_frac=1.0"
+              ssh ${HOST_USER}@${peer_addr} "(cd $PWD/../federated-learning/; $PYTHON_CMD) > $PWD/../server_${peer_addr[0]}.log 2>&1 &"
+            done
+            sleep 180
+            curl -i -X GET 'http://localhost:8888/messages'
             # detect test finish or not
             testFinish "${scheme_name}"
             # gather output, move to the right directory
