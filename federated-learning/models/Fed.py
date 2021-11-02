@@ -9,7 +9,9 @@ logging.setLoggerClass(ColoredLogger)
 logger = logging.getLogger("Fed")
 
 
-def fed_avg(w):
+def fed_avg(w, w_glob):
+    if len(w) == 0:
+        return w_glob
     w_avg = copy.deepcopy(w[0])
     for k in w_avg.keys():
         for i in range(1, len(w)):
@@ -19,7 +21,9 @@ def fed_avg(w):
 
 
 # """ node-summarized error feedback sign SGD """
-def node_summarized_sign_sgd(w_list, w_glob, server_learning_rate, num_nodes):
+def node_summarized_sign_sgd(w_list, w_glob, server_learning_rate):
+    if len(w_list) == 0:
+        return w_glob
     new_w_glob = copy.deepcopy(w_glob)
     server_step = copy.deepcopy(w_glob)
     for k in w_glob.keys():
@@ -30,7 +34,7 @@ def node_summarized_sign_sgd(w_list, w_glob, server_learning_rate, num_nodes):
                 signed_w_sum[k] = torch.zeros_like(w_list[i][k])
             signed_w_sum[k] = torch.add(signed_w_sum[k], w_list[i][k])
         # node sign weighted aggregation
-        signed_w_sum[k] = torch.div(signed_w_sum[k], num_nodes)
+        signed_w_sum[k] = torch.div(signed_w_sum[k], len(w_list))
         # print("signed_w_sum[k]: {}".format(signed_w_sum[k]))
         # for each key, update w_glob by multiply sign(sum) with learning rate
         server_step[k] = torch.mul(signed_w_sum[k], server_learning_rate)

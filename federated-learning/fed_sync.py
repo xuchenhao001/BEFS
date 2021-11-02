@@ -122,15 +122,16 @@ def train():
 
 # STEP #3
 def train_count(w_compressed):
-    if model_store.local_models_add_count(utils.util.decompress_tensor(w_compressed), trainer.args.num_users):
+    if model_store.local_models_add_count(utils.util.decompress_tensor(w_compressed), trainer.args.num_users,
+                                          is_raft=True):
         logger.debug("Gathered enough train_ready, aggregate global model and send the download link.")
         # aggregate global model
         if trainer.args.sign_sgd:
             trainer.server_learning_rate_adjust(trainer.epoch)
             w_glob = node_summarized_sign_sgd(model_store.local_models, model_store.global_model,
-                                              trainer.args.server_lr, trainer.args.num_users)
+                                              trainer.args.server_lr)
         else:
-            w_glob = fed_avg(model_store.local_models)
+            w_glob = fed_avg(model_store.local_models, model_store.global_model)
         # reset local models after aggregation
         model_store.local_models_reset()
         # save global model for further download

@@ -36,8 +36,8 @@ def args_parser():
     parser.add_argument('--exit_sleep', type=int, default=60, help="sleep for seconds before exit python")
     # poisoning attacker ids, must be string type. For example, "1,2" or ""
     parser.add_argument('--poisoning_nodes', type=str, default="", help="id of nodes that will launch trojan attack")
-    # ddos attack duration (epochs), -1 means no ddos, 0 means unlimited
-    parser.add_argument("--ddos_duration", type=int, default=-1)
+    # launch ddos attack or not
+    parser.add_argument("--ddos_attack", action='store_true', help="launch ddos attack or not")
     # under ddos attack, no response request percent
     parser.add_argument("--ddos_no_response_percent", type=float, default=0.9)
     # sign SGD, default is false

@@ -1,5 +1,6 @@
 import copy
 import logging
+import random
 import threading
 
 import torch
@@ -25,10 +26,18 @@ class ModelStore:
         self.momentum = {}  # momentum
         self.corrected_momentum = {}  # corrected momentum
 
-    def local_models_add_count(self, w_local, count_target):
+    def local_models_add_count(self, w_local, count_target, ddos_attack=False, ddos_no_response_percent=0.0,
+                               is_raft=False):
         reach_target = False
         lock.acquire()
-        self.local_models.append(w_local)
+        # mimic DDoS attacks here
+        if (ddos_attack is True) and (not is_raft):
+            logger.debug("Mimic the aggregator under DDoS attacks!")
+            if random.random() < ddos_no_response_percent:
+                logger.debug("Unfortunately, the aggregator does not response to the local update gradients")
+                # Do nothing
+            else:
+                self.local_models.append(w_local)
         self.local_models_count_num += 1
         if self.local_models_count_num == count_target:
             reach_target = True

@@ -125,14 +125,15 @@ def gathered_global_w(w_glob_compressed):
 
 def average_local_w(uuid, from_ip, w_compressed):
     ipCount.set_map(uuid, from_ip)
-    if model_store.local_models_add_count(utils.util.decompress_tensor(w_compressed), trainer.args.num_users):
+    if model_store.local_models_add_count(utils.util.decompress_tensor(w_compressed), trainer.args.num_users,
+                                          trainer.args.ddos_attack, trainer.args.ddos_no_response_percent, False):
         logger.debug("Gathered enough w, average and release them")
         if trainer.args.sign_sgd:
             trainer.server_learning_rate_adjust(trainer.epoch)
             w_glob = node_summarized_sign_sgd(model_store.local_models, model_store.global_model,
-                                              trainer.args.server_lr, trainer.args.num_users)
+                                              trainer.args.server_lr)
         else:
-            w_glob = fed_avg(model_store.local_models)
+            w_glob = fed_avg(model_store.local_models, model_store.global_model)
         # reset local models after aggregation
         model_store.local_models_reset()
         # save global model
