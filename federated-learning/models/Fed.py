@@ -43,9 +43,8 @@ def node_summarized_sign_sgd(w_list, w_glob, server_learning_rate):
 
 
 # """ error feedback sign SGD """
-def error_feedback_sign_sgd(w_list, w_glob, num_nodes, scaling):
+def error_feedback_sign_sgd(w_list, w_glob, scaling):
     new_w_glob = copy.deepcopy(w_glob)
-    server_step = copy.deepcopy(w_glob)
     for k in w_glob.keys():
         signed_w_sum = {}
         # for each key, calculate sum
@@ -55,7 +54,24 @@ def error_feedback_sign_sgd(w_list, w_glob, num_nodes, scaling):
             scaled_w_local_k = torch.mul(w_list[i][k], scaling)
             signed_w_sum[k] = torch.add(signed_w_sum[k], scaled_w_local_k)
         # node sign weighted aggregation
-        signed_w_sum[k] = torch.div(signed_w_sum[k], num_nodes)
+        signed_w_sum[k] = torch.div(signed_w_sum[k], len(w_list))
         new_w_glob[k] = torch.add(w_glob[k], signed_w_sum[k])
     return new_w_glob
 
+
+# """ original sign SGD """
+def sign_sgd(w_list, w_glob, server_learning_rate):
+    new_w_glob = copy.deepcopy(w_glob)
+    server_step = copy.deepcopy(w_glob)
+    for k in w_glob.keys():
+        signed_w_sum = {}
+        # for each key, calculate sum
+        for i in range(len(w_list)):
+            if k not in signed_w_sum:
+                signed_w_sum[k] = torch.zeros_like(w_list[i][k])
+            signed_w_sum[k] = torch.add(signed_w_sum[k], w_list[i][k])
+        # node sign weighted aggregation
+        signed_w_sum[k] = torch.sign(signed_w_sum[k])
+        server_step[k] = torch.mul(signed_w_sum[k], server_learning_rate)
+        new_w_glob[k] = torch.add(w_glob[k], server_step[k])
+    return new_w_glob

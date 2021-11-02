@@ -5,7 +5,8 @@ import threading
 
 import torch
 
-from utils.util import ColoredLogger, compress_tensor, generate_md5_hash, extract_sign_by_diff, extract_ef_sign
+from utils.util import ColoredLogger, compress_tensor, generate_md5_hash, extract_corrected_diff_sign, \
+    extract_ef_sign, extract_diff_sign
 
 lock = threading.Lock()
 
@@ -31,13 +32,12 @@ class ModelStore:
         reach_target = False
         lock.acquire()
         # mimic DDoS attacks here
-        if (ddos_attack is True) and (not is_raft):
+        if (ddos_attack is True) and (not is_raft) and (random.random() < ddos_no_response_percent):
             logger.debug("Mimic the aggregator under DDoS attacks!")
-            if random.random() < ddos_no_response_percent:
-                logger.debug("Unfortunately, the aggregator does not response to the local update gradients")
-                # Do nothing
-            else:
-                self.local_models.append(w_local)
+            logger.debug("Unfortunately, the aggregator does not response to the local update gradients")
+            # Do nothing
+        else:
+            self.local_models.append(w_local)
         self.local_models_count_num += 1
         if self.local_models_count_num == count_target:
             reach_target = True
@@ -66,9 +66,12 @@ class ModelStore:
         for k in old_w_glob.keys():
             self.d_w_global[k] = torch.sub(new_w_glob[k], old_w_glob[k])
 
+    def extract_corrected_sign(self, w_local, beta):
+        return extract_corrected_diff_sign(w_local, self.global_model, self.momentum, self.corrected_momentum, beta,
+                                           self.d_w_global)
+
     def extract_sign(self, w_local, beta):
-        return extract_sign_by_diff(w_local, self.global_model, self.momentum, self.corrected_momentum, beta,
-                                    self.d_w_global)
+        return extract_diff_sign(w_local, self.global_model, self.momentum, beta)
 
     def extract_ef_sign(self, w_local):
         return extract_ef_sign(w_local, self.global_model, self.corrected_momentum, self.d_w_global)
