@@ -13,17 +13,23 @@ import matplotlib.font_manager as font_manager
 plt.rcParams["mathtext.fontset"] = "cm"
 
 
-# Plot size settings: "L", "M", "S"
-# L: Single plot
-# M: Three in a row
-# S: Four in a row (bigger fonts)
+# Plot number in a row: "2", "3", "4"
+# 2: Two plots in a row (the smallest fonts)
+# 3: Three plots in a row
+# 4: Four plots in a row (the biggest fonts)
 def get_font_settings(size):
-    if size == "L":
-        font_size_dict = {"l": 17, "m": 15, "s": 13}
-    elif size == "M":
-        font_size_dict = {"l": 19, "m": 17, "s": 15}
-    else:
+    if size == "2":
+        font_size_dict = {"l": 21, "m": 18, "s": 16}
+        fig_width = 7.5  # by default is 6.4 x 4.8
+        fig_height = 5
+    elif size == "3":
         font_size_dict = {"l": 25, "m": 21, "s": 19}
+        fig_width = 7.5
+        fig_height = 5
+    else:
+        font_size_dict = {"l": 25, "m": 25, "s": 25}
+        fig_width = 6.4
+        fig_height = 4.8
 
     xy_label_font = font_manager.FontProperties(
         family='Times New Roman', weight='bold', style='normal', size=font_size_dict["l"])
@@ -40,11 +46,13 @@ def get_font_settings(size):
         'cs_xy_label_font': cs_xy_label_font,
         'cs_title_font': cs_title_font,
         'cs_xy_ticks_font': cs_xy_ticks_font,
+        'fig_width': fig_width,
+        'fig_height': fig_height,
     }
     return font_factory
 
 
-def plot_time_acc(title, fed_sync_sgd, fed_sync, fed_efsign, fed_avg, local_train, save_path=None, plot_size="L"):
+def plot_time_acc(title, fed_sync_sgd, fed_sync, fed_efsign, fed_avg, local_train, save_path=None, plot_size="2"):
     font_settings = get_font_settings(plot_size)
     x = range(1, len(fed_sync_sgd) + 1)
 
@@ -66,13 +74,14 @@ def plot_time_acc(title, fed_sync_sgd, fed_sync, fed_efsign, fed_avg, local_trai
     # plt.xlim(0, xrange)
     plt.legend(prop=font_settings.get("legend_font"), loc='lower right').set_zorder(11)
     plt.grid()
+    fig.set_size_inches(font_settings.get("fig_width"), font_settings.get("fig_height"))
     if save_path:
         plt.savefig(save_path)
     else:
         plt.show()
 
 
-def plot_time_bar(title, sgd, sign_sgd, save_path=None, plot_size="L"):
+def plot_time_bar(title, sgd, sign_sgd, save_path=None, plot_size="2"):
     font_settings = get_font_settings(plot_size)
     x = ["CNN-CIFAR10", "CNN-FMNIST", "MLP-FMNIST"]
 
@@ -110,13 +119,14 @@ def plot_time_bar(title, sgd, sign_sgd, save_path=None, plot_size="L"):
     # fig.legend(handles, labels, loc='upper right', prop=font_settings.get("legend_font"))
 
     fig.tight_layout()
+    fig.set_size_inches(font_settings.get("fig_width"), font_settings.get("fig_height"))
     if save_path:
         plt.savefig(save_path)
     else:
         plt.show()
 
 
-def plot_ddos_acc(title, fed_sync_sgd, fed_avg, fed_efsign, fed_sign, save_path=None, is_acc=True, plot_size="L"):
+def plot_ddos_acc(title, fed_sync_sgd, fed_avg, fed_efsign, fed_sign, save_path=None, plot_size="2"):
     font_settings = get_font_settings(plot_size)
     x = range(1, len(fed_sync_sgd) + 1)
 
@@ -137,13 +147,14 @@ def plot_ddos_acc(title, fed_sync_sgd, fed_avg, fed_efsign, fed_sign, save_path=
     # plt.xlim(0, xrange)
     plt.legend(prop=font_settings.get("legend_font"), loc='lower right').set_zorder(11)
     plt.grid()
+    fig.set_size_inches(font_settings.get("fig_width"), font_settings.get("fig_height"))
     if save_path:
         plt.savefig(save_path)
     else:
         plt.show()
 
 
-def plot_time_acc_fall(title, fed_sync_sgd, fed_efsign, fed_avg, save_path=None, plot_size="L"):
+def plot_time_acc_fall(title, fed_sync_sgd, fed_efsign, fed_avg, save_path=None, plot_size="2"):
     font_settings = get_font_settings(plot_size)
     x = range(1, len(fed_sync_sgd) + 1)
 
@@ -163,6 +174,7 @@ def plot_time_acc_fall(title, fed_sync_sgd, fed_efsign, fed_avg, save_path=None,
     # plt.xlim(0, xrange)
     plt.legend(prop=font_settings.get("legend_font")).set_zorder(11)
     plt.grid()
+    fig.set_size_inches(font_settings.get("fig_width"), font_settings.get("fig_height"))
     if save_path:
         plt.savefig(save_path)
     else:
