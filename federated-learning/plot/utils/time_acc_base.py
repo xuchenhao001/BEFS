@@ -52,7 +52,8 @@ def get_font_settings(size):
     return font_factory
 
 
-def plot_time_acc(title, fed_sync_sgd, fed_sync, fed_efsign, fed_avg, local_train, save_path=None, plot_size="2"):
+def plot_time_acc(title, fed_sync_sgd, fed_sync, fed_efsign, fed_sign_sgd, fed_avg, local_train, save_path=None,
+                  plot_size="2"):
     font_settings = get_font_settings(plot_size)
     x = range(1, len(fed_sync_sgd) + 1)
 
@@ -61,6 +62,7 @@ def plot_time_acc(title, fed_sync_sgd, fed_sync, fed_efsign, fed_avg, local_trai
     axes.plot(x, fed_sync_sgd, label="BEFS-signSGD", linewidth=3, zorder=10)
     axes.plot(x, fed_sync, label="BEFS-SGD")
     axes.plot(x, fed_efsign, label="EF-signSGD")
+    axes.plot(x, fed_sign_sgd, label="signSGD")
     axes.plot(x, fed_avg, label="FedAVG")
     axes.plot(x, local_train, label="Local")
 
