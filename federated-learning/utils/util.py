@@ -88,7 +88,7 @@ def model_loader(model_name, dataset_name, device, img_size):
     elif model_name == 'cnn' and dataset_name == 'mnist':
         net_glob = CNNMnist(num_classes=10).to(device)
     elif model_name == 'cnn' and dataset_name == 'fmnist':
-        net_glob = CNNFashion(num_classes=10).to(device)
+        net_glob = CNNMnist(num_classes=10).to(device)
     elif model_name == 'cnn' and dataset_name == 'uci':
         net_glob = UCI_CNN(num_classes=6).to(device)
     elif model_name == 'cnn' and dataset_name == 'realworld':
@@ -217,6 +217,20 @@ def generate_md5_hash(model_weights):
     np_model_weights = __convert_tensor_value_to_numpy(model_weights)
     data_md5 = hashlib.md5(json.dumps(np_model_weights, sort_keys=True, cls=NumpyEncoder).encode('utf-8')).hexdigest()
     return data_md5
+
+
+def evaluate_model_size(model, is_sign_sgd):
+    if is_sign_sgd:
+        data = copy.deepcopy(model)
+        for key in data:
+            signs = torch.flatten(data[key]).type(torch.IntTensor)
+            data[key] = np.packbits(signs, axis=-1)
+        converted = data
+    else:
+        converted = __convert_tensor_value_to_numpy(model)
+    encoded = json.dumps(converted, sort_keys=True, indent=4, ensure_ascii=False, cls=NumpyEncoder).encode(
+        'utf8')
+    return len(encoded)
 
 
 def extract_diff_sign(w_local, w_glob, momentum, beta):

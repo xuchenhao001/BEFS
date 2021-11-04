@@ -79,6 +79,9 @@ def train():
     trainer.round_train_duration = time.time() - train_start_time
 
     # send local model to the first node
+    if trainer.is_first_epoch():
+        w_local_size = utils.util.evaluate_model_size(w_local, trainer.args.sign_sgd)
+        logger.info("local model size: {}".format(w_local_size))
     w_local_compressed = utils.util.compress_tensor(w_local)
     from_ip = utils.util.get_ip(trainer.args.test_ip_addr)
     body_data = {
