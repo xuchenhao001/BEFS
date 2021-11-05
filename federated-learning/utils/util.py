@@ -88,7 +88,7 @@ def model_loader(model_name, dataset_name, device, img_size):
     elif model_name == 'cnn' and dataset_name == 'mnist':
         net_glob = CNNMnist(num_classes=10).to(device)
     elif model_name == 'cnn' and dataset_name == 'fmnist':
-        net_glob = CNNMnist(num_classes=10).to(device)
+        net_glob = CNNFashion(num_classes=10).to(device)
     elif model_name == 'cnn' and dataset_name == 'uci':
         net_glob = UCI_CNN(num_classes=6).to(device)
     elif model_name == 'cnn' and dataset_name == 'realworld':
