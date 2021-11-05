@@ -4,9 +4,9 @@ from utils.parse_output import calculate_average_across_files
 
 
 def extract_round_acc():
-    exp_node_number = "v1"
+    exp_node_number = "v3"
     model_name = "cnn"
-    dataset_name = "cifar"
+    dataset_name = "fmnist"
 
     experiment_names = ["fed_avg", "fed_efsign", "fed_sync", "fed_sync_sgd", "fed_sign", "local_train"]
 
@@ -17,10 +17,10 @@ def extract_round_acc():
             for experiment_name in experiment_names:
                 experiment_path = os.path.join(path, experiment_name)
                 files_numbers_mean_2d_np = calculate_average_across_files(experiment_path)
-                round_time = [round(i, 2) for i in files_numbers_mean_2d_np[:, 1]]
-                train_time = [round(i, 2) for i in files_numbers_mean_2d_np[:, 2]]
-                test_time = [round(i, 2) for i in files_numbers_mean_2d_np[:, 3]]
-                communication_time = [round(i, 2) for i in files_numbers_mean_2d_np[:, 4]]
+                round_time = [round(i, 2) for i in files_numbers_mean_2d_np[:50, 1]]
+                train_time = [round(i, 2) for i in files_numbers_mean_2d_np[:50, 2]]
+                test_time = [round(i, 2) for i in files_numbers_mean_2d_np[:50, 3]]
+                communication_time = [round(i, 2) for i in files_numbers_mean_2d_np[:50, 4]]
                 result_time_array = [
                     round(sum(round_time)/len(round_time), 2),
                     round(sum(train_time)/len(train_time), 2),
