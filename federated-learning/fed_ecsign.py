@@ -9,7 +9,7 @@ from utils.CentralStore import IPCount
 from utils.ModelStore import ModelStore
 from utils.Train import Train
 from utils.util import ColoredLogger
-from models.Fed import fed_avg, node_summarized_sign_sgd
+from models.Fed import sign_sgd_ec
 
 logging.setLoggerClass(ColoredLogger)
 logging.getLogger("werkzeug").setLevel(logging.ERROR)
@@ -74,14 +74,10 @@ def train():
     train_start_time = time.time()
     w_local, w_loss = trainer.train()
     w_local = trainer.poisoning_attack(w_local)
-    if trainer.args.sign_sgd:
-        w_local = model_store.extract_corrected_sign(w_local, trainer.args.sign_sgd_beta)
+    w_local = model_store.extract_sign(w_local, trainer.args.sign_sgd_beta)
     trainer.round_train_duration = time.time() - train_start_time
 
     # send local model to the first node
-    if trainer.is_first_epoch():
-        w_local_size = utils.util.evaluate_model_size(w_local, trainer.args.sign_sgd)
-        logger.info("local model size: {}".format(w_local_size))
     w_local_compressed = utils.util.compress_tensor(w_local)
     from_ip = utils.util.get_ip(trainer.args.test_ip_addr)
     body_data = {
@@ -129,15 +125,10 @@ def gathered_global_w(w_glob_compressed):
 def average_local_w(local_uuid, from_ip, w_compressed):
     ipCount.set_map(local_uuid, from_ip)
     if model_store.local_models_add_count(local_uuid, utils.util.decompress_tensor(w_compressed),
-                                          trainer.args.num_users, trainer.args.ddos_attack,
-                                          trainer.args.ddos_no_response_percent, False):
+                                          trainer.args.num_users, is_raft=False):
         logger.debug("Gathered enough w, average and release them")
-        if trainer.args.sign_sgd:
-            trainer.server_learning_rate_adjust(trainer.epoch)
-            w_glob = node_summarized_sign_sgd(model_store.local_models, model_store.global_model,
-                                              trainer.args.server_lr)
-        else:
-            w_glob = fed_avg(model_store.local_models, model_store.global_model)
+        trainer.server_learning_rate_adjust(trainer.epoch)
+        w_glob = sign_sgd_ec(model_store.local_models, model_store.global_model, trainer.args.server_lr)
         # reset local models after aggregation
         model_store.local_models_reset()
         # save global model

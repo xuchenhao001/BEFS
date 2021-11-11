@@ -103,6 +103,7 @@ def train():
     body_data = {
         "message": "train_ready",
         "w_compressed": w_local_compressed,
+        "uuid": trainer.uuid,
     }
     trainer.post_msg_trigger(body_data)
 
@@ -121,9 +122,9 @@ def train():
 
 
 # STEP #3
-def train_count(w_compressed):
-    if model_store.local_models_add_count(utils.util.decompress_tensor(w_compressed), trainer.args.num_users,
-                                          is_raft=True):
+def train_count(local_uuid, w_compressed):
+    if model_store.local_models_add_count(local_uuid, utils.util.decompress_tensor(w_compressed),
+                                          trainer.args.num_users, is_raft=True):
         logger.debug("Gathered enough train_ready, aggregate global model and send the download link.")
         # aggregate global model
         if trainer.args.sign_sgd:
@@ -266,7 +267,7 @@ def my_route(app):
             message = data.get("message")
 
             if message == "train_ready":
-                threading.Thread(target=train_count, args=(data.get("w_compressed"), )).start()
+                threading.Thread(target=train_count, args=(data.get("uuid"), data.get("w_compressed"))).start()
             elif message == "global_model":
                 detail = download_global_model(data.get("epochs"))
             elif message == "next_round_count":

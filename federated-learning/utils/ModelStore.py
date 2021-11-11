@@ -17,7 +17,7 @@ logger = logging.getLogger("ModelStore")
 class ModelStore:
     def __init__(self):
         self.local_models_count_num = 0
-        self.local_models = []
+        self.local_models = {}
         self.global_model = None
         self.global_model_compressed = None
         self.global_model_hash = None
@@ -27,7 +27,7 @@ class ModelStore:
         self.momentum = {}  # momentum
         self.corrected_momentum = {}  # corrected momentum
 
-    def local_models_add_count(self, w_local, count_target, ddos_attack=False, ddos_no_response_percent=0.0,
+    def local_models_add_count(self, local_uuid, w_local, count_target, ddos_attack=False, ddos_no_response_percent=0.0,
                                is_raft=False):
         reach_target = False
         lock.acquire()
@@ -37,7 +37,7 @@ class ModelStore:
             logger.debug("Unfortunately, the aggregator does not response to the local update gradients")
             # Do nothing
         else:
-            self.local_models.append(w_local)
+            self.local_models[local_uuid] = w_local
         self.local_models_count_num += 1
         if self.local_models_count_num == count_target:
             reach_target = True
@@ -47,7 +47,7 @@ class ModelStore:
 
     def local_models_reset(self):
         lock.acquire()
-        self.local_models = []
+        self.local_models = {}
         self.local_models_count_num = 0
         lock.release()
         logger.debug("Reset local_models, now: {}".format(len(self.local_models)))

@@ -123,10 +123,10 @@ def gathered_global_w(w_glob_compressed):
         trainer.post_msg_trigger(body_data)
 
 
-def average_local_w(uuid, from_ip, w_compressed, scaling):
-    ipCount.set_map(uuid, from_ip)
-    if model_store.local_models_add_count(utils.util.decompress_tensor(w_compressed), trainer.args.num_users,
-                                          is_raft=False):
+def average_local_w(local_uuid, from_ip, w_compressed, scaling):
+    ipCount.set_map(local_uuid, from_ip)
+    if model_store.local_models_add_count(local_uuid, utils.util.decompress_tensor(w_compressed),
+                                          trainer.args.num_users, is_raft=False):
         logger.debug("Gathered enough w, average and release them")
         trainer.server_learning_rate_adjust(trainer.epoch)
         w_glob = error_feedback_sign_sgd(model_store.local_models, model_store.global_model, scaling)
