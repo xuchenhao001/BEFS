@@ -13,7 +13,7 @@ def fed_avg(w_dict, w_glob):
     if len(w_dict) == 0:
         return w_glob
     w_avg = {}
-    for k in w_avg.keys():
+    for k in w_glob.keys():
         for local_uuid in w_dict:
             if k not in w_avg:
                 w_avg[k] = torch.zeros_like(w_glob[k])
