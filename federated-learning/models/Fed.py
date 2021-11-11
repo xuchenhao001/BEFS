@@ -9,32 +9,34 @@ logging.setLoggerClass(ColoredLogger)
 logger = logging.getLogger("Fed")
 
 
-def fed_avg(w, w_glob):
-    if len(w) == 0:
+def fed_avg(w_dict, w_glob):
+    if len(w_dict) == 0:
         return w_glob
-    w_avg = copy.deepcopy(w[0])
+    w_avg = {}
     for k in w_avg.keys():
-        for i in range(1, len(w)):
-            w_avg[k] = torch.add(w_avg[k], w[i][k])
-        w_avg[k] = torch.div(w_avg[k], len(w))
+        for local_uuid in w_dict:
+            if k not in w_avg:
+                w_avg[k] = torch.zeros_like(w_glob[k])
+            w_avg[k] = torch.add(w_avg[k], w_dict[local_uuid][k])
+        w_avg[k] = torch.div(w_avg[k], len(w_dict))
     return w_avg
 
 
 # """ node-summarized error feedback sign SGD """
-def node_summarized_sign_sgd(w_list, w_glob, server_learning_rate):
-    if len(w_list) == 0:
+def node_summarized_sign_sgd(w_dict, w_glob, server_learning_rate):
+    if len(w_dict) == 0:
         return w_glob
     new_w_glob = copy.deepcopy(w_glob)
     server_step = copy.deepcopy(w_glob)
     for k in w_glob.keys():
         signed_w_sum = {}
         # for each key, calculate sum
-        for i in range(len(w_list)):
+        for local_uuid in w_dict:
             if k not in signed_w_sum:
-                signed_w_sum[k] = torch.zeros_like(w_list[i][k])
-            signed_w_sum[k] = torch.add(signed_w_sum[k], w_list[i][k])
+                signed_w_sum[k] = torch.zeros_like(w_dict[local_uuid][k])
+            signed_w_sum[k] = torch.add(signed_w_sum[k], w_dict[local_uuid][k])
         # node sign weighted aggregation
-        signed_w_sum[k] = torch.div(signed_w_sum[k], len(w_list))
+        signed_w_sum[k] = torch.div(signed_w_sum[k], len(w_dict))
         # for each key, update w_glob by multiply sign(sum) with learning rate
         server_step[k] = torch.mul(signed_w_sum[k], server_learning_rate)
         new_w_glob[k] = torch.add(w_glob[k], server_step[k])
@@ -42,24 +44,28 @@ def node_summarized_sign_sgd(w_list, w_glob, server_learning_rate):
 
 
 # """ error feedback sign SGD """
-def error_feedback_sign_sgd(w_list, w_glob, scaling):
+def error_feedback_sign_sgd(w_dict, w_glob, scaling):
+    if len(w_dict) == 0:
+        return w_glob
     new_w_glob = copy.deepcopy(w_glob)
     for k in w_glob.keys():
         signed_w_sum = {}
         # for each key, calculate sum
-        for i in range(len(w_list)):
+        for local_uuid in w_dict:
             if k not in signed_w_sum:
-                signed_w_sum[k] = torch.zeros_like(w_list[i][k])
-            scaled_w_local_k = torch.mul(w_list[i][k], scaling)
+                signed_w_sum[k] = torch.zeros_like(w_dict[local_uuid][k])
+            scaled_w_local_k = torch.mul(w_dict[local_uuid][k], scaling)
             signed_w_sum[k] = torch.add(signed_w_sum[k], scaled_w_local_k)
         # node sign weighted aggregation
-        signed_w_sum[k] = torch.div(signed_w_sum[k], len(w_list))
+        signed_w_sum[k] = torch.div(signed_w_sum[k], len(w_dict))
         new_w_glob[k] = torch.add(w_glob[k], signed_w_sum[k])
     return new_w_glob
 
 
 # """ sign SGD with majority vote """
 def sign_sgd_mv(w_dict, w_glob, server_learning_rate):
+    if len(w_dict) == 0:
+        return w_glob
     new_w_glob = copy.deepcopy(w_glob)
     server_step = copy.deepcopy(w_glob)
     for k in w_glob.keys():
@@ -81,6 +87,8 @@ def sign_sgd_mv(w_dict, w_glob, server_learning_rate):
 # encoding matrix (G) w/ r=3.8
 # [[1,0,0,0,0], [0,1,1,1,0], [1,1,1,1,1], [1,1,1,1,1], [1,1,1,1,1]]
 def sign_sgd_ec(w_dict, w_glob, server_learning_rate):
+    if len(w_dict) == 0:
+        return w_glob
     coded_w_dict = {}
     for local_uuid in w_dict:
         for k in w_glob.keys():
@@ -113,6 +121,8 @@ def sign_sgd_ec(w_dict, w_glob, server_learning_rate):
 # ref: https://github.com/TinfoilHat0/Defending-Against-Backdoors-with-Robust-Learning-Rate
 # learning threshold theta = 0.5
 def sign_sgd_rlr(w_dict, w_glob, server_learning_rate):
+    if len(w_dict) == 0:
+        return w_glob
     theta = 0.5
     threshold_node_number = len(w_dict) * theta
     new_w_glob = copy.deepcopy(w_glob)
