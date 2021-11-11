@@ -75,8 +75,8 @@ function main() {
             echo "[`date`] ## ${scheme_name} done ##"
         fi
 
-        # fed_sign
-        scheme_name="fed_sign"
+        # fed_mvsign
+        scheme_name="fed_mvsign"
         if [[ ! -d "${model}-${dataset}/${scheme_name}" ]]; then
             echo "[`date`] ## ${scheme_name} start ##"
             clean

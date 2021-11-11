@@ -9,7 +9,7 @@ import torch
 from torch.utils.data import Dataset, DataLoader
 from torchvision import datasets, transforms
 
-from utils.sampling import iid_onepass, noniid_onepass
+from utils.sampling import iid_onepass, noniid_onepass, get_indices
 from custom_datasets.REALWORLD import REALWORLDDataset
 from custom_datasets.UCI import UCIDataset
 from utils.util import ColoredLogger
@@ -38,7 +38,9 @@ class DatasetSplit(Dataset):
 
 class MyDataset:
     def __init__(self, dataset_name, dataset_train_size, is_iid, num_users):
-        dataset_test_size = int(dataset_train_size * 0.25)  # the dataset size ratio of the training to the test is 8:2
+        self.dataset_train_size = dataset_train_size
+        dataset_test_size = int(dataset_train_size * 0.2)
+        self.dataset_test_size = dataset_test_size
         dataset_train = None
         dataset_test = None
         dict_users = None
@@ -132,6 +134,14 @@ class MyDataset:
         self.trojan_base_class = args.trojan_base_class
         self.trojan_target_class = args.trojan_target_class
         self.trojan_frac = args.trojan_frac
+        logger.info("Detected backdoor attack. Adjust test dataset to class 1 only.")
+        idx = (self.dataset_test.targets == 1)
+        self.dataset_test.targets = self.dataset_test.targets[idx]
+        self.dataset_test.data = self.dataset_test.data[idx]
+        test_idxs = np.arange(len(self.dataset_test))
+        for i in range(args.num_users):
+            self.test_users[i] = get_indices(np.vstack((test_idxs, self.dataset_test.targets)), [1],
+                                             self.dataset_test_size)
 
     def load_train_dataset(self, idx, local_bs, is_first_epoch):
         split_ds = DatasetSplit(self.dataset_train, self.dict_users[idx])
