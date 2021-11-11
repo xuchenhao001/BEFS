@@ -62,7 +62,7 @@ def plot_time_acc(title, fed_sync_sgd, fed_sync, fed_efsign, fed_sign_sgd, fed_a
     axes.plot(x, fed_sync_sgd, label="BEFS-signSGD", linewidth=3, zorder=10)
     axes.plot(x, fed_sync, label="BEFS-SGD")
     axes.plot(x, fed_efsign, label="EF-signSGD")
-    axes.plot(x, fed_sign_sgd, label="signSGD")
+    axes.plot(x, fed_sign_sgd, label="SignSGD")
     axes.plot(x, fed_avg, label="FedAVG")
     axes.plot(x, local_train, label="Local")
 
@@ -136,7 +136,7 @@ def plot_ddos_acc(title, fed_sync_sgd, fed_avg, fed_efsign, fed_sign, save_path=
 
     axes.plot(x, fed_sync_sgd, label="BEFS-signSGD", linewidth=3, zorder=10)
     axes.plot(x, fed_efsign, label="EF-signSGD")
-    axes.plot(x, fed_sign, label="signSGD")
+    axes.plot(x, fed_sign, label="SignSGD")
     axes.plot(x, fed_avg, label="FedAVG")
 
     axes.set_xlabel("Training Round", **font_settings.get("cs_xy_label_font"))

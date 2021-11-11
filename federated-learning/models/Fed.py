@@ -97,9 +97,12 @@ def sign_sgd_ec(w_dict, w_glob, server_learning_rate):
                 coded_w_dict[local_uuid][k] = torch.sum(torch.stack([w_dict[local_uuid][k]]), dim=0)
             elif local_uuid % 5 == 2:
                 coded_w_dict[local_uuid][k] = torch.sum(torch.stack([w_dict[local_uuid][k], w_dict[local_uuid+1][k], w_dict[local_uuid+2][k]]), dim=0)
+            elif local_uuid % 5 == 0:
+                idx = local_uuid - 4
+                coded_w_dict[local_uuid][k] = torch.sum(torch.stack([w_dict[idx][k], w_dict[idx + 1][k], w_dict[idx + 2][k], w_dict[idx + 3][k], w_dict[idx + 4][k]]), dim=0)
             else:
                 idx = local_uuid - local_uuid % 5 + 1
-                coded_w_dict[local_uuid][k] = torch.sum(torch.stack([w_dict[idx][k], w_dict[idx+1][k], w_dict[idx+2][k], w_dict[idx+3][k], w_dict[idx+4][k]]), dim=0)
+                coded_w_dict[local_uuid][k] = torch.sum(torch.stack([w_dict[idx][k], w_dict[idx + 1][k], w_dict[idx + 2][k], w_dict[idx + 3][k], w_dict[idx + 4][k]]), dim=0)
             coded_w_dict[local_uuid][k] = torch.sign(coded_w_dict[local_uuid][k])
     new_w_glob = copy.deepcopy(w_glob)
     server_step = copy.deepcopy(w_glob)
