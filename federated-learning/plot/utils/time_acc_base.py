@@ -83,6 +83,37 @@ def plot_time_acc(title, fed_sync_sgd, fed_sync, fed_efsign, fed_sign_sgd, fed_a
         plt.show()
 
 
+def plot_time_acc_attack(title, fed_sync_sgd, fed_ecsign, fed_efsign, fed_mvsign, fed_rlrsign, fed_avg, save_path=None,
+                         plot_size="2"):
+    font_settings = get_font_settings(plot_size)
+    x = range(1, len(fed_sync_sgd) + 1)
+
+    fig, axes = plt.subplots()
+
+    axes.plot(x, fed_sync_sgd, label="BEFS-signSGD", linewidth=3, zorder=10)
+    axes.plot(x, fed_ecsign, label="EC-signSGD")
+    axes.plot(x, fed_efsign, label="EF-signSGD")
+    axes.plot(x, fed_mvsign, label="MV-signSGD")
+    axes.plot(x, fed_rlrsign, label="RLR-signSGD")
+    axes.plot(x, fed_avg, label="FedAVG")
+
+    axes.set_xlabel("Training Round", **font_settings.get("cs_xy_label_font"))
+    axes.set_ylabel("Average Test Accuracy (%)", **font_settings.get("cs_xy_label_font"))
+
+    plt.title(title, **font_settings.get("cs_title_font"))
+    plt.xticks(**font_settings.get("cs_xy_ticks_font"))
+    plt.yticks(**font_settings.get("cs_xy_ticks_font"))
+    plt.tight_layout()
+    # plt.xlim(0, xrange)
+    plt.legend(prop=font_settings.get("legend_font"), loc='lower right').set_zorder(11)
+    plt.grid()
+    fig.set_size_inches(font_settings.get("fig_width"), font_settings.get("fig_height"))
+    if save_path:
+        plt.savefig(save_path)
+    else:
+        plt.show()
+
+
 def plot_time_bar(title, sgd, sign_sgd, save_path=None, plot_size="2"):
     font_settings = get_font_settings(plot_size)
     x = ["CNN-CIFAR10", "CNN-FMNIST", "MLP-FMNIST"]
