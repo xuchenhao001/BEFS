@@ -54,6 +54,7 @@ def get_font_settings(size):
 
 
 def get_cycle_settings():
+    # color names: https://matplotlib.org/stable/gallery/color/named_colors.html
     # colors = plt.get_cmap('tab10').colors  # by default
     colors = ("tab:blue",) + plt.get_cmap('Set2').colors
     # colors = [plt.cm.Spectral(i / float(6)) for i in range(6)]
