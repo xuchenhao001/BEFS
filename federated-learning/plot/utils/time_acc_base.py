@@ -7,6 +7,7 @@
 # ```
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as font_manager
+from cycler import cycler
 
 # input latex symbols in matplotlib
 # https://stackoverflow.com/questions/43741928/matplotlib-raw-latex-epsilon-only-yields-varepsilon
@@ -52,14 +53,28 @@ def get_font_settings(size):
     return font_factory
 
 
+def get_cycle_settings():
+    # colors = plt.get_cmap('tab10').colors  # by default
+    colors = ("tab:blue",) + plt.get_cmap('Set2').colors
+    # colors = [plt.cm.Spectral(i / float(6)) for i in range(6)]
+    # colors = ['tab:red', 'tab:blue', 'tab:green', 'tab:orange', 'tab:brown', 'tab:grey', 'tab:pink', 'tab:olive']
+
+    markers = ["D", "o", "^", "s", "*", "X", "d", "x", "1"]
+    # my_cycler = cycler(color=colors, marker=markers)
+    my_cycler = cycler(color=colors)
+    return my_cycler
+
+
 def plot_time_acc(title, fed_sync_sgd, fed_sync, fed_efsign, fed_sign_sgd, fed_avg, local_train, save_path=None,
                   plot_size="2"):
     font_settings = get_font_settings(plot_size)
+    cycle_settings = get_cycle_settings()
     x = range(1, len(fed_sync_sgd) + 1)
 
     fig, axes = plt.subplots()
+    axes.set_prop_cycle(cycle_settings)
 
-    axes.plot(x, fed_sync_sgd, label="BEFS-signSGD", linewidth=3, zorder=10)
+    axes.plot(x, fed_sync_sgd, label="BEFS-signSGD", linewidth=4.5, zorder=10)
     axes.plot(x, fed_sync, label="BEFS-SGD")
     axes.plot(x, fed_efsign, label="EF-signSGD")
     axes.plot(x, fed_sign_sgd, label="SignSGD")
@@ -86,11 +101,13 @@ def plot_time_acc(title, fed_sync_sgd, fed_sync, fed_efsign, fed_sign_sgd, fed_a
 def plot_time_acc_attack(title, fed_sync_sgd, fed_ecsign, fed_efsign, fed_mvsign, fed_rlrsign, fed_avg, save_path=None,
                          plot_size="2"):
     font_settings = get_font_settings(plot_size)
+    cycle_settings = get_cycle_settings()
     x = range(1, len(fed_sync_sgd) + 1)
 
     fig, axes = plt.subplots()
+    axes.set_prop_cycle(cycle_settings)
 
-    axes.plot(x, fed_sync_sgd, label="BEFS-signSGD", linewidth=3, zorder=10)
+    axes.plot(x, fed_sync_sgd, label="BEFS-signSGD", linewidth=4.5, zorder=10)
     axes.plot(x, fed_ecsign, label="EC-signSGD")
     axes.plot(x, fed_efsign, label="EF-signSGD")
     axes.plot(x, fed_mvsign, label="MV-signSGD")
@@ -161,11 +178,13 @@ def plot_time_bar(title, sgd, sign_sgd, save_path=None, plot_size="2"):
 
 def plot_ddos_acc(title, fed_sync_sgd, fed_avg, fed_efsign, fed_sign, save_path=None, plot_size="2"):
     font_settings = get_font_settings(plot_size)
+    cycle_settings = get_cycle_settings()
     x = range(1, len(fed_sync_sgd) + 1)
 
     fig, axes = plt.subplots()
+    axes.set_prop_cycle(cycle_settings)
 
-    axes.plot(x, fed_sync_sgd, label="BEFS-signSGD", linewidth=3, zorder=10)
+    axes.plot(x, fed_sync_sgd, label="BEFS-signSGD", linewidth=4.5, zorder=10)
     axes.plot(x, fed_efsign, label="EF-signSGD")
     axes.plot(x, fed_sign, label="SignSGD")
     axes.plot(x, fed_avg, label="FedAVG")
@@ -189,11 +208,13 @@ def plot_ddos_acc(title, fed_sync_sgd, fed_avg, fed_efsign, fed_sign, save_path=
 
 def plot_time_acc_fall(title, fed_sync_sgd, fed_efsign, fed_avg, save_path=None, plot_size="2"):
     font_settings = get_font_settings(plot_size)
+    cycle_settings = get_cycle_settings()
     x = range(1, len(fed_sync_sgd) + 1)
 
     fig, axes = plt.subplots()
+    axes.set_prop_cycle(cycle_settings)
 
-    axes.plot(x, fed_sync_sgd, label="BEFS", linewidth=3, zorder=10)
+    axes.plot(x, fed_sync_sgd, label="BEFS", linewidth=4.5, zorder=10)
     axes.plot(x, fed_efsign, label="ARE")
     axes.plot(x, fed_avg, label="FedAVG")
 
