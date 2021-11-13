@@ -138,7 +138,8 @@ def sign_sgd_rlr(w_dict, w_glob, server_learning_rate):
                 signed_w_sum[k] = torch.zeros_like(w_dict[local_uuid][k])
             signed_w_sum[k] = torch.add(signed_w_sum[k], w_dict[local_uuid][k])
         # robust learning rate adjustment
-        rlr = torch.where(signed_w_sum[k] > threshold_node_number, 1, -1)
-        server_step[k] = torch.mul(rlr, server_learning_rate)
+        rlr = torch.where(abs(signed_w_sum[k]) > threshold_node_number, signed_w_sum[k], -signed_w_sum[k])
+        sign_rlr = torch.sign(rlr)
+        server_step[k] = torch.mul(sign_rlr, server_learning_rate)
         new_w_glob[k] = torch.add(w_glob[k], server_step[k])
     return new_w_glob

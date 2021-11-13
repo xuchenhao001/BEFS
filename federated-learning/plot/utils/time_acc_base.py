@@ -177,7 +177,7 @@ def plot_time_bar(title, sgd, sign_sgd, save_path=None, plot_size="2"):
         plt.show()
 
 
-def plot_ddos_acc(title, fed_sync_sgd, fed_avg, fed_efsign, fed_sign, save_path=None, plot_size="2"):
+def plot_ddos_acc(title, fed_sync_sgd, fed_ecsign, fed_efsign, fed_mvsign, fed_rlrsign, fed_avg, save_path=None, plot_size="2"):
     font_settings = get_font_settings(plot_size)
     cycle_settings = get_cycle_settings()
     x = range(1, len(fed_sync_sgd) + 1)
