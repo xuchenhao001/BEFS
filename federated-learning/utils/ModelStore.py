@@ -51,6 +51,8 @@ class ModelStore:
     def local_models_reset(self):
         lock.acquire()
         self.local_models = {}
+        self.local_models_acc = {}
+        self.local_models_loss = {}
         self.local_models_count_num = 0
         lock.release()
         logger.debug("Reset local_models, now: {}".format(len(self.local_models)))
