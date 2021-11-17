@@ -44,7 +44,8 @@ class ModelStore:
         if self.local_models_count_num == count_target:
             reach_target = True
         lock.release()
-        logger.debug("Added local_models, now: {}".format(len(self.local_models)))
+        logger.debug("Count local_models: {}. Gathered {} local models in total".format(self.local_models_count_num,
+                                                                                        len(self.local_models)))
         return reach_target
 
     def local_models_reset(self):

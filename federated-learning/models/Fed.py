@@ -151,12 +151,12 @@ def sign_sgd_rlr(w_dict, w_glob, server_learning_rate):
 # In 29th {USENIX} Security Symposium ({USENIX} Security 20), pp. 1605-1622. 2020.
 def fed_err(w_dict, w_acc_dict, w_glob, compromise_rate):
     compromise_num = round(len(w_dict) * compromise_rate)
+    if len(w_dict) <= compromise_num:
+        return w_glob
     for _ in range(compromise_num):
         min_key = min(w_acc_dict, key=w_acc_dict.get)
         del w_acc_dict[min_key]
         del w_dict[min_key]
-    if len(w_dict) == 0:
-        return w_glob
     w_avg = {}
     for k in w_glob.keys():
         for local_uuid in w_dict:
@@ -172,12 +172,12 @@ def fed_err(w_dict, w_acc_dict, w_glob, compromise_rate):
 # In 29th {USENIX} Security Symposium ({USENIX} Security 20), pp. 1605-1622. 2020.
 def fed_lfr(w_dict, w_loss_dict, w_glob, compromise_rate):
     compromise_num = round(len(w_dict) * compromise_rate)
+    if len(w_dict) <= compromise_num:
+        return w_glob
     for _ in range(compromise_num):
         max_key = max(w_loss_dict, key=w_loss_dict.get)
         del w_loss_dict[max_key]
         del w_dict[max_key]
-    if len(w_dict) == 0:
-        return w_glob
     w_avg = {}
     for k in w_glob.keys():
         for local_uuid in w_dict:
