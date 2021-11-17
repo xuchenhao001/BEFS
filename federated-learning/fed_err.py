@@ -138,7 +138,7 @@ def average_local_w(local_uuid, from_ip, w_compressed):
             acc, _, _, _, _ = trainer.evaluate_model()
             model_store.local_models_acc[w_local_id] = acc
         w_glob = fed_err(model_store.local_models, model_store.local_models_acc, model_store.global_model,
-                         trainer.args.err_compromise_rate)
+                         round(trainer.args.err_compromise_rate * trainer.args.num_users))
         # reset local models after aggregation
         model_store.local_models_reset()
         # save global model

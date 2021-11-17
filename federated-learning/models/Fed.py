@@ -149,11 +149,11 @@ def sign_sgd_rlr(w_dict, w_glob, server_learning_rate):
 # Fang, Minghong, Xiaoyu Cao, Jinyuan Jia, and Neil Gong.
 # "Local model poisoning attacks to byzantine-robust federated learning."
 # In 29th {USENIX} Security Symposium ({USENIX} Security 20), pp. 1605-1622. 2020.
-def fed_err(w_dict, w_acc_dict, w_glob, compromise_rate):
-    compromise_num = round(len(w_dict) * compromise_rate)
+def fed_err(w_dict, w_acc_dict, w_glob, compromise_num):
     if len(w_dict) <= compromise_num:
         return w_glob
     for _ in range(compromise_num):
+        logger.debug("Before remove compromised nodes: {}".format(w_dict))
         min_key = min(w_acc_dict, key=w_acc_dict.get)
         del w_acc_dict[min_key]
         del w_dict[min_key]
@@ -166,15 +166,16 @@ def fed_err(w_dict, w_acc_dict, w_glob, compromise_rate):
         w_avg[k] = torch.div(w_avg[k], len(w_dict))
     return w_avg
 
+
 # Loss Function based Rejection
 # Fang, Minghong, Xiaoyu Cao, Jinyuan Jia, and Neil Gong.
 # "Local model poisoning attacks to byzantine-robust federated learning."
 # In 29th {USENIX} Security Symposium ({USENIX} Security 20), pp. 1605-1622. 2020.
-def fed_lfr(w_dict, w_loss_dict, w_glob, compromise_rate):
-    compromise_num = round(len(w_dict) * compromise_rate)
+def fed_lfr(w_dict, w_loss_dict, w_glob, compromise_num):
     if len(w_dict) <= compromise_num:
         return w_glob
     for _ in range(compromise_num):
+        logger.debug("Before remove compromised nodes: {}".format(w_dict))
         max_key = max(w_loss_dict, key=w_loss_dict.get)
         del w_loss_dict[max_key]
         del w_dict[max_key]
