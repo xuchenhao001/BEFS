@@ -153,7 +153,7 @@ def fed_err(w_dict, w_acc_dict, w_glob, compromise_num):
     if len(w_dict) <= compromise_num:
         return w_glob
     for _ in range(compromise_num):
-        logger.debug("Before remove compromised nodes: {}".format(w_dict))
+        logger.debug("Before remove compromised nodes: {}".format(w_dict.keys()))
         min_key = min(w_acc_dict, key=w_acc_dict.get)
         del w_acc_dict[min_key]
         del w_dict[min_key]
@@ -175,7 +175,7 @@ def fed_lfr(w_dict, w_loss_dict, w_glob, compromise_num):
     if len(w_dict) <= compromise_num:
         return w_glob
     for _ in range(compromise_num):
-        logger.debug("Before remove compromised nodes: {}".format(w_dict))
+        logger.debug("Before remove compromised nodes: {}".format(w_dict.keys()))
         max_key = max(w_loss_dict, key=w_loss_dict.get)
         del w_loss_dict[max_key]
         del w_dict[max_key]
