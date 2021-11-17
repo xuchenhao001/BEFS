@@ -84,7 +84,6 @@ class Train:
         loss_local, loss_local_skew1, loss_local_skew2, loss_local_skew3, loss_local_skew4 = \
             test_model(self.net_glob, self.dataset, self.uuid - 1, self.args.iid, self.args.local_test_bs,
                        self.args.device, get_acc=False)
-        print("loss: {}".format(loss_local))
         return loss_local, loss_local_skew1, loss_local_skew2, loss_local_skew3, loss_local_skew4
 
     def evaluate_model_with_log(self, record_epoch=None, clean=False, record_communication_time=False):
