@@ -15,7 +15,7 @@ def test_img(net_g, my_dataset, test_indices, local_test_bs, device):
             data, target = data.to(device), target.to(device)
         log_probs = net_g(data)
         # sum up batch loss
-        test_loss += F.cross_entropy(log_probs, target, reduction='sum').item()
+        test_loss += F.cross_entropy(log_probs, target, reduction='sum')
         # get the index of the max log-probability
         y_pred = log_probs.data.max(1, keepdim=True)[1]
         correct += y_pred.eq(target.data.view_as(y_pred)).long().cpu().sum()
@@ -37,12 +37,12 @@ def test_img_total(net_g, my_dataset, idx_list, local_test_bs, device):
             accuracy_local = 100.0 * correct_test_local / len(idx_list[0])
             accuracy_list.append(accuracy_local)
             loss_test_local = loss_test
-            loss_local = 100.0 * loss_test_local / len(idx_list[0])
+            loss_local = loss_test_local / len(idx_list[0])
             test_loss_list.append(loss_local)
         else:
             accuracy_skew = 100.0 * (correct_test_local + correct_test) / (len(idx_list[0]) + len(idx_list[i]))
             accuracy_list.append(accuracy_skew)
-            loss_skew = 100.0 * (loss_test_local + loss_test) / (len(idx_list[0]) + len(idx_list[i]))
+            loss_skew = (loss_test_local + loss_test) / (len(idx_list[0]) + len(idx_list[i]))
             test_loss_list.append(loss_skew)
 
     return accuracy_list, test_loss_list

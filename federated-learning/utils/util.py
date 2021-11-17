@@ -101,22 +101,34 @@ def model_loader(model_name, dataset_name, device, img_size):
     return net_glob
 
 
-def test_model(net_glob, my_dataset, idx, is_iid, local_test_bs, device):
+def test_model(net_glob, my_dataset, idx, is_iid, local_test_bs, device, get_acc=True):
     if is_iid:
         idx_total = [my_dataset.test_users[idx]]
-        acc_list, _ = test_img_total(net_glob, my_dataset, idx_total, local_test_bs, device)
+        acc_list, loss_list = test_img_total(net_glob, my_dataset, idx_total, local_test_bs, device)
         acc_local = acc_list[0].item()
-        return acc_local, 0.0, 0.0, 0.0, 0.0
+        loss_local = loss_list[0].item()
+        if get_acc:
+            return acc_local, 0.0, 0.0, 0.0, 0.0
+        else:
+            return loss_local, 0.0, 0.0, 0.0, 0.0
     else:
         idx_total = [my_dataset.test_users[idx], my_dataset.skew_users[0][idx], my_dataset.skew_users[1][idx],
                      my_dataset.skew_users[2][idx], my_dataset.skew_users[3][idx]]
-        acc_list, _ = test_img_total(net_glob, my_dataset, idx_total, local_test_bs, device)
+        acc_list, loss_list = test_img_total(net_glob, my_dataset, idx_total, local_test_bs, device)
         acc_local = acc_list[0].item()
         acc_local_skew1 = acc_list[1].item()
         acc_local_skew2 = acc_list[2].item()
         acc_local_skew3 = acc_list[3].item()
         acc_local_skew4 = acc_list[4].item()
-        return acc_local, acc_local_skew1, acc_local_skew2, acc_local_skew3, acc_local_skew4
+        loss_local = loss_list[0].item()
+        loss_local_skew1 = loss_list[1].item()
+        loss_local_skew2 = loss_list[2].item()
+        loss_local_skew3 = loss_list[3].item()
+        loss_local_skew4 = loss_list[4].item()
+        if get_acc:
+            return acc_local, acc_local_skew1, acc_local_skew2, acc_local_skew3, acc_local_skew4
+        else:
+            return loss_local, loss_local_skew1, loss_local_skew2, loss_local_skew3, loss_local_skew4
 
 
 def train_model(net_glob, my_dataset, idx, local_ep, device, lr, momentum, local_bs, is_first_epoch):

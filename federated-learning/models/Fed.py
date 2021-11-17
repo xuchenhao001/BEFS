@@ -143,3 +143,46 @@ def sign_sgd_rlr(w_dict, w_glob, server_learning_rate):
         server_step[k] = torch.mul(sign_rlr, server_learning_rate)
         new_w_glob[k] = torch.add(w_glob[k], server_step[k])
     return new_w_glob
+
+
+# Error Rate based Rejection
+# Fang, Minghong, Xiaoyu Cao, Jinyuan Jia, and Neil Gong.
+# "Local model poisoning attacks to byzantine-robust federated learning."
+# In 29th {USENIX} Security Symposium ({USENIX} Security 20), pp. 1605-1622. 2020.
+def fed_err(w_dict, w_acc_dict, w_glob, compromise_rate):
+    compromise_num = round(len(w_dict) * compromise_rate)
+    for _ in range(compromise_num):
+        min_key = min(w_acc_dict, key=w_acc_dict.get)
+        del w_acc_dict[min_key]
+        del w_dict[min_key]
+    if len(w_dict) == 0:
+        return w_glob
+    w_avg = {}
+    for k in w_glob.keys():
+        for local_uuid in w_dict:
+            if k not in w_avg:
+                w_avg[k] = torch.zeros_like(w_glob[k])
+            w_avg[k] = torch.add(w_avg[k], w_dict[local_uuid][k])
+        w_avg[k] = torch.div(w_avg[k], len(w_dict))
+    return w_avg
+
+# Loss Function based Rejection
+# Fang, Minghong, Xiaoyu Cao, Jinyuan Jia, and Neil Gong.
+# "Local model poisoning attacks to byzantine-robust federated learning."
+# In 29th {USENIX} Security Symposium ({USENIX} Security 20), pp. 1605-1622. 2020.
+def fed_lfr(w_dict, w_loss_dict, w_glob, compromise_rate):
+    compromise_num = round(len(w_dict) * compromise_rate)
+    for _ in range(compromise_num):
+        max_key = max(w_loss_dict, key=w_loss_dict.get)
+        del w_loss_dict[max_key]
+        del w_dict[max_key]
+    if len(w_dict) == 0:
+        return w_glob
+    w_avg = {}
+    for k in w_glob.keys():
+        for local_uuid in w_dict:
+            if k not in w_avg:
+                w_avg[k] = torch.zeros_like(w_glob[k])
+            w_avg[k] = torch.add(w_avg[k], w_dict[local_uuid][k])
+        w_avg[k] = torch.div(w_avg[k], len(w_dict))
+    return w_avg

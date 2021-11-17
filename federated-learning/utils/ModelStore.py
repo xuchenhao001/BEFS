@@ -18,6 +18,8 @@ class ModelStore:
     def __init__(self):
         self.local_models_count_num = 0
         self.local_models = {}
+        self.local_models_acc = {}  # for fed_err
+        self.local_models_loss = {}  # for fed_lfr
         self.global_model = None
         self.global_model_compressed = None
         self.global_model_hash = None

@@ -34,18 +34,24 @@ def args_parser():
     parser.add_argument('--start_sleep', type=int, default=180, help="sleep for seconds before start train")
     # sleep for several seconds before exit python
     parser.add_argument('--exit_sleep', type=int, default=60, help="sleep for seconds before exit python")
-    # poisoning attacker ids, must be string type. For example, "1,2" or ""
-    parser.add_argument('--poisoning_nodes', type=str, default="", help="id of nodes that will launch trojan attack")
-    # launch ddos attack or not
-    parser.add_argument("--ddos_attack", action='store_true', help="launch ddos attack or not")
-    # under ddos attack, no response request percent
-    parser.add_argument("--ddos_no_response_percent", type=float, default=0.9)
     # sign SGD, default is false
     parser.add_argument('--sign_sgd', action='store_true', help='whether adopting sign SGD or not')
     parser.add_argument('--server_lr', type=float, default=0.01, help="sign SGD server learning rate")
     parser.add_argument('--server_lr_decimate', type=str, default='100,150',
                         help='comma-separated epoch number (int) that learning rate to be divided by 10')
     parser.add_argument('--sign_sgd_beta', type=float, default=0.5, help="beta parameter in sign SGD momentum")
+    # Error Rate based Rejection and Loss Function based Rejection
+    parser.add_argument('--err_compromise_rate', type=float, default=0.3, help="compromise rate for ERR and LFR")
+
+    # security-related parameters
+    # poisoning attacker ids, must be string type. For example, "1,2" or ""
+    parser.add_argument('--poisoning_nodes', type=str, default="", help="id of nodes that will launch trojan attack")
+
+    # launch ddos attack or not
+    parser.add_argument("--ddos_attack", action='store_true', help="launch ddos attack or not")
+    # under ddos attack, no response request percent
+    parser.add_argument("--ddos_no_response_percent", type=float, default=0.9)
+
     # backdoor attack (trojan attack)
     parser.add_argument('--trojan_nodes', type=str, default='', help="id of nodes that will launch trojan attack")
     parser.add_argument('--trojan_base_class', type=int, default=1, help="base class for trojan attack")
