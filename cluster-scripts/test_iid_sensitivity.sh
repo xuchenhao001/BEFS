@@ -15,8 +15,8 @@ function main() {
 
         # fed_sync sgd
         scheme_name="fed_sync"
-        if [[ ! -d "${model}-${dataset}/${scheme_name}_sgd_01" ]]; then
-            echo "[`date`] ## ${scheme_name}_sgd_01 start ##"
+        if [[ ! -d "${model}-${dataset}/${scheme_name}_sgd_1" ]]; then
+            echo "[`date`] ## ${scheme_name}_sgd_1 start ##"
             clean
             for i in "${!PEER_ADDRS[@]}"; do
               peer_addr=(${PEER_ADDRS[i]//:/ })
@@ -30,8 +30,8 @@ function main() {
             # detect test finish or not
             testFinish "${scheme_name}"
             # gather output, move to the right directory
-            arrangeOutput ${model} ${dataset} "${scheme_name}_sgd_01"
-            echo "[`date`] ## ${scheme_name}_sgd_01 done ##"
+            arrangeOutput ${model} ${dataset} "${scheme_name}_sgd_1"
+            echo "[`date`] ## ${scheme_name}_sgd_1 done ##"
         fi
 
         # fed_sync sgd

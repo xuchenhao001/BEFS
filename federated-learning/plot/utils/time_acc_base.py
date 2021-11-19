@@ -66,8 +66,7 @@ def get_cycle_settings():
     return my_cycler
 
 
-def plot_time_acc(title, fed_sync_sgd, fed_sync, fed_efsign, fed_sign_sgd, fed_avg, local_train, save_path=None,
-                  plot_size="2"):
+def plot_time_acc(title, fed_sync_sgd, fed_efsign, fed_sign_sgd, fed_avg, local_train, save_path=None, plot_size="2"):
     font_settings = get_font_settings(plot_size)
     cycle_settings = get_cycle_settings()
     x = range(1, len(fed_sync_sgd) + 1)
@@ -75,11 +74,10 @@ def plot_time_acc(title, fed_sync_sgd, fed_sync, fed_efsign, fed_sign_sgd, fed_a
     fig, axes = plt.subplots()
     axes.set_prop_cycle(cycle_settings)
 
-    axes.plot(x, fed_sync_sgd, label="BEFS-signSGD", linewidth=4.5, zorder=10)
-    axes.plot(x, fed_sync, label="BEFS-SGD")
+    axes.plot(x, fed_sync_sgd, label="BEFS", linewidth=4.5, zorder=10)
     axes.plot(x, fed_efsign, label="EF-signSGD")
     axes.plot(x, fed_sign_sgd, label="SignSGD")
-    axes.plot(x, fed_avg, label="FedAVG")
+    axes.plot(x, fed_avg, label="FedAvg")
     axes.plot(x, local_train, label="Local")
 
     axes.set_xlabel("Training Round", **font_settings.get("cs_xy_label_font"))
@@ -99,8 +97,66 @@ def plot_time_acc(title, fed_sync_sgd, fed_sync, fed_efsign, fed_sign_sgd, fed_a
         plt.show()
 
 
-def plot_time_acc_attack(title, fed_sync_sgd, fed_ecsign, fed_efsign, fed_mvsign, fed_rlrsign, fed_avg, save_path=None,
-                         plot_size="2"):
+def plot_time_acc_ablation(title, bc_ns, bc_FedAvg, ns, save_path=None, plot_size="2"):
+    font_settings = get_font_settings(plot_size)
+    cycle_settings = get_cycle_settings()
+    x = range(1, len(bc_ns) + 1)
+
+    fig, axes = plt.subplots()
+    axes.set_prop_cycle(cycle_settings)
+
+    axes.plot(x, bc_ns, label="BC-NS (BEFS)", linewidth=4.5, zorder=10)
+    axes.plot(x, bc_FedAvg, label="BC-FedAvg")
+    axes.plot(x, ns, label="NS")
+
+    axes.set_xlabel("Training Round", **font_settings.get("cs_xy_label_font"))
+    axes.set_ylabel("Average Test Accuracy (%)", **font_settings.get("cs_xy_label_font"))
+
+    plt.title(title, **font_settings.get("cs_title_font"))
+    plt.xticks(**font_settings.get("cs_xy_ticks_font"))
+    plt.yticks(**font_settings.get("cs_xy_ticks_font"))
+    plt.tight_layout()
+    # plt.xlim(0, xrange)
+    plt.legend(prop=font_settings.get("legend_font"), loc='lower right').set_zorder(11)
+    plt.grid()
+    fig.set_size_inches(font_settings.get("fig_width"), font_settings.get("fig_height"))
+    if save_path:
+        plt.savefig(save_path)
+    else:
+        plt.show()
+
+
+def plot_time_acc_sensitivity(title, lr_1, lr_01, lr_001, save_path=None, plot_size="2"):
+    font_settings = get_font_settings(plot_size)
+    cycle_settings = get_cycle_settings()
+    x = range(1, len(lr_1) + 1)
+
+    fig, axes = plt.subplots()
+    axes.set_prop_cycle(cycle_settings)
+
+    axes.plot(x, lr_01, label="lr=0.01", linewidth=4.5, zorder=10)
+    axes.plot(x, lr_1, label="lr=0.1")
+    axes.plot(x, lr_001, label="lr=0.001")
+
+    axes.set_xlabel("Training Round", **font_settings.get("cs_xy_label_font"))
+    axes.set_ylabel("Average Test Accuracy (%)", **font_settings.get("cs_xy_label_font"))
+
+    plt.title(title, **font_settings.get("cs_title_font"))
+    plt.xticks(**font_settings.get("cs_xy_ticks_font"))
+    plt.yticks(**font_settings.get("cs_xy_ticks_font"))
+    plt.tight_layout()
+    # plt.xlim(0, xrange)
+    plt.legend(prop=font_settings.get("legend_font"), loc='lower right').set_zorder(11)
+    plt.grid()
+    fig.set_size_inches(font_settings.get("fig_width"), font_settings.get("fig_height"))
+    if save_path:
+        plt.savefig(save_path)
+    else:
+        plt.show()
+
+
+def plot_time_acc_attack(title, fed_sync_sgd, fed_ecsign, fed_efsign, fed_mvsign, fed_rlrsign, fed_avg, fed_err,
+                         fed_lfr, save_path=None, plot_size="2"):
     font_settings = get_font_settings(plot_size)
     cycle_settings = get_cycle_settings()
     x = range(1, len(fed_sync_sgd) + 1)
@@ -108,12 +164,14 @@ def plot_time_acc_attack(title, fed_sync_sgd, fed_ecsign, fed_efsign, fed_mvsign
     fig, axes = plt.subplots()
     axes.set_prop_cycle(cycle_settings)
 
-    axes.plot(x, fed_sync_sgd, label="BEFS-signSGD", linewidth=4.5, zorder=10)
+    axes.plot(x, fed_sync_sgd, label="BEFS", linewidth=4.5, zorder=10)
     axes.plot(x, fed_ecsign, label="EC-signSGD")
     axes.plot(x, fed_efsign, label="EF-signSGD")
     axes.plot(x, fed_mvsign, label="MV-signSGD")
     axes.plot(x, fed_rlrsign, label="RLR-signSGD")
-    axes.plot(x, fed_avg, label="FedAVG")
+    axes.plot(x, fed_err, label="ERR-FedAvg")
+    axes.plot(x, fed_lfr, label="LFR-FedAvg")
+    axes.plot(x, fed_avg, label="FedAvg")
 
     axes.set_xlabel("Training Round", **font_settings.get("cs_xy_label_font"))
     axes.set_ylabel("Average Test Accuracy (%)", **font_settings.get("cs_xy_label_font"))
@@ -177,36 +235,6 @@ def plot_time_bar(title, sgd, sign_sgd, save_path=None, plot_size="2"):
         plt.show()
 
 
-def plot_ddos_acc(title, fed_sync_sgd, fed_ecsign, fed_efsign, fed_mvsign, fed_rlrsign, fed_avg, save_path=None, plot_size="2"):
-    font_settings = get_font_settings(plot_size)
-    cycle_settings = get_cycle_settings()
-    x = range(1, len(fed_sync_sgd) + 1)
-
-    fig, axes = plt.subplots()
-    axes.set_prop_cycle(cycle_settings)
-
-    axes.plot(x, fed_sync_sgd, label="BEFS-signSGD", linewidth=4.5, zorder=10)
-    axes.plot(x, fed_efsign, label="EF-signSGD")
-    axes.plot(x, fed_sign, label="SignSGD")
-    axes.plot(x, fed_avg, label="FedAVG")
-
-    axes.set_xlabel("Training Round", **font_settings.get("cs_xy_label_font"))
-    axes.set_ylabel("Average Test Accuracy (%)", **font_settings.get("cs_xy_label_font"))
-
-    plt.title(title, **font_settings.get("cs_title_font"))
-    plt.xticks(**font_settings.get("cs_xy_ticks_font"))
-    plt.yticks(**font_settings.get("cs_xy_ticks_font"))
-    plt.tight_layout()
-    # plt.xlim(0, xrange)
-    plt.legend(prop=font_settings.get("legend_font"), loc='lower right').set_zorder(11)
-    plt.grid()
-    fig.set_size_inches(font_settings.get("fig_width"), font_settings.get("fig_height"))
-    if save_path:
-        plt.savefig(save_path)
-    else:
-        plt.show()
-
-
 def plot_time_acc_fall(title, fed_sync_sgd, fed_efsign, fed_avg, save_path=None, plot_size="2"):
     font_settings = get_font_settings(plot_size)
     cycle_settings = get_cycle_settings()
@@ -217,7 +245,7 @@ def plot_time_acc_fall(title, fed_sync_sgd, fed_efsign, fed_avg, save_path=None,
 
     axes.plot(x, fed_sync_sgd, label="BEFS", linewidth=4.5, zorder=10)
     axes.plot(x, fed_efsign, label="ARE")
-    axes.plot(x, fed_avg, label="FedAVG")
+    axes.plot(x, fed_avg, label="FedAvg")
 
     axes.set_xlabel("Training Round", **font_settings.get("cs_xy_label_font"))
     axes.set_ylabel("Average Test Accuracy (%)", **font_settings.get("cs_xy_label_font"))
