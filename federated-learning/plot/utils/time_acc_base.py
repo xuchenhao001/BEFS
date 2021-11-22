@@ -105,8 +105,8 @@ def plot_time_acc_ablation(title, bc_ns, bc_FedAvg, ns, save_path=None, plot_siz
     fig, axes = plt.subplots()
     axes.set_prop_cycle(cycle_settings)
 
-    axes.plot(x, bc_ns, label="BC-NS (BEFS)", linewidth=4.5, zorder=10)
-    axes.plot(x, bc_FedAvg, label="BC-FedAvg")
+    axes.plot(x, bc_ns, label="BC+NS (BEFS)", linewidth=4.5, zorder=10)
+    axes.plot(x, bc_FedAvg, label="BC+FedAvg")
     axes.plot(x, ns, label="NS")
 
     axes.set_xlabel("Training Round", **font_settings.get("cs_xy_label_font"))
