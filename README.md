@@ -58,23 +58,6 @@ Require matplotlib (>=3.3.1), numpy (>=1.18.5), torch (>=1.7.1) torchvision (>=0
 pip3 install matplotlib numpy torch torchvision flask sklearn hickle pandas
 ```
 
-For Raspberry PI, download wheels from [here](https://github.com/Qengineering/PyTorch-Raspberry-Pi-64-OS), then:
-```
-sudo apt install -y python3-h5py libopenblas-dev
-# Download the torch wheels from the website, then install the wheels. Finally:
-pip3 install matplotlib numpy flask sklearn hickle pandas
-```
-
-### GPU
-
-It's better to have a gpu cuda, which could accelerate the training process. To check if you have any gpu(cuda):
-
-```bash
-nvidia-smi
-# or
-sudo lshw -C display
-```
-
 ## Run
 
 How to start & stop this project.
@@ -83,30 +66,20 @@ How to start & stop this project.
 
 Before start blockchain network, you need to determine the number of blockchain nodes, the user name (should be the same) of remote hosts, and their location in the network. The configure file is located at `fabric-network/network.config`.
 
-For example, you have two nodes running on the same node `10.0.2.15`, the user name of the host is `xueri`, then you can do it like:
+For example, you have three nodes running on the three nodes `10.0.2.15`, `10.0.2.16`, and `10.0.2.17`, the user name of the host is `ubuntu`. Then you can do it like:
 
 ```bash
 #!/bin/bash
 HostUser="ubuntu"
 PeerAddress=(
   "10.0.2.15:7051"
-  "10.0.2.15:8051"
+  "10.0.2.16:7051"
+  "10.0.2.17:7051"
 )
 ```
 
 > Notice that only one node is allowed to be allocated on the one node.
 
-Another example is you have three nodes running the the different hosts (`10.0.2.15` and `10.0.2.16`) and the user name for all the hosts is `ubuntu`, then your configuration could be like this:
-
-```bash
-#!/bin/bash
-HostUser="ubuntu"
-PeerAddress=(
-  "10.0.2.15:7051"
-  "10.0.2.15:8051"
-  "10.0.2.16:7051"
-)
-```
 
 After modified the configuration file, now start your blockchain network:
 
@@ -141,9 +114,9 @@ The parameters for the training are at `./BEFS/federated-learning/utils/options.
 ```bash
 cd federated-learning/
 rm -f result-*
-python3 fed_server.py
+python3 fed_avg.py
 # Or start in background
-nohup python3 -u fed_server.py > fed_server.log 2>&1 &
+nohup python3 -u fed_avg.py > fed_avg.log 2>&1 &
 ```
 
 Trigger training to start:
@@ -157,62 +130,13 @@ curl -i -X GET 'http://localhost:8888/messages'
 The comparative experiments include (under `BEFS/federated-learning/` directory):
 
 ```bash
-fed_async.py  # our proposed asynchronous federated learning schema (need blockchain)
-fed_sync.py  # synchronous federated learning schema (need blockchain)
-fed_avg.py  # synchronous federated learning (FedAvg) algorithm (no need blockchain)
-fed_localA.py  # adaptive personalized federated learning (APFL) (no need blockchain)
-local_train.py  # local deep learning algorithm (Local Training) (no need blockchain)
+fed_sync.py  # BEFS
+fed_avg.py  # FedAvg
+fed_ecsign.py  # EC-signSGD
+fed_efsign.py  # EF-signSGD
+fed_err.py  # ERR-FedAvg
+fed_lfr.py  # LFR-FedAvg
+fed_mvsign.py  # MV-signSGD
+fed_rlrsign.py  # RLR-signSGD
+local_train.py  # Local
 ```
-
-Before running tests automatically, adjust parameters at `cluster-scripts/test.config`:
-
-```bash
-#!/bin/bash
-
-# all schemes to test
-TestSchema=(
-        "cnn-fashion_mnist"
-        "cnn-cifar"
-        "mlp-fashion_mnist"
-        "lstm-loop"
-)
-
-# test iid or non-iid datasets
-IS_IID=true
-
-# the default scaling factor setting, -1 means dynamic scaling factor
-FADE=-1
-
-# the ID of the poisoning attacker
-ATTACKER=5
-
-# the training dataset size on each node
-TrainDataSize=(
-        "1500"
-        "1500"
-        "1500"
-        "1500"
-        "1500"
-)
-```
-
-To run all tests automatically, go to `cluster-scripts/`, and run:
-
-```bash
-./all_nodes_test_bg.sh  # test BAFL, BSFL, FedAVG, APFL, and Local Training
-./all_nodes_test_async_bg.sh  # test BAFL
-./all_nodes_test_ddos_attack_bg.sh  # test BAFL and AFL under DDoS attacks
-./all_nodes_test_poisoning_attack_bg.sh  # test BAFL and AFL under poisoning attacks
-./all_nodes_test_static_bg.sh  # test BAFL under dynamic or static settings
-```
-
-There are additional scripts that ease cluster operations under `cluster-scripts/`:
-
-```bash
-./all_nodes_update.sh  # updates codes on all nodes, following the IPs at `fabric-network/network.config`
-./clean-output.sh  # clean logs on all nodes
-./gather-output.sh  # gather logs on all nodes
-./replace_network_config.sh  # replace `fabric-network/network.config` on all nodes by that on this node
-./restart_blockchain_server.sh  # restart the blockchain server on this node
-```
-
