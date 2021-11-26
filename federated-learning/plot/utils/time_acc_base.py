@@ -8,6 +8,7 @@
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as font_manager
 from cycler import cycler
+import pylab
 
 # input latex symbols in matplotlib
 # https://stackoverflow.com/questions/43741928/matplotlib-raw-latex-epsilon-only-yields-varepsilon
@@ -21,12 +22,12 @@ plt.rcParams["mathtext.fontset"] = "cm"
 def get_font_settings(size):
     if size == "2":
         font_size_dict = {"l": 21, "m": 18, "s": 16}
-        fig_width = 7.5  # by default is 6.4 x 4.8
-        fig_height = 5
+        fig_width = 8  # by default is 6.4 x 4.8
+        fig_height = 4
     elif size == "3":
         font_size_dict = {"l": 25, "m": 21, "s": 19}
-        fig_width = 7.5
-        fig_height = 5
+        fig_width = 8
+        fig_height = 4
     else:
         font_size_dict = {"l": 25, "m": 25, "s": 25}
         fig_width = 6.4
@@ -81,20 +82,21 @@ def plot_time_acc(title, fed_sync_sgd, fed_efsign, fed_sign_sgd, fed_avg, local_
     axes.plot(x, local_train, label="Local")
 
     axes.set_xlabel("Training Round", **font_settings.get("cs_xy_label_font"))
-    axes.set_ylabel("Average Test Accuracy (%)", **font_settings.get("cs_xy_label_font"))
+    axes.set_ylabel("Accuracy (%)", **font_settings.get("cs_xy_label_font"))
 
     plt.title(title, **font_settings.get("cs_title_font"))
     plt.xticks(**font_settings.get("cs_xy_ticks_font"))
     plt.yticks(**font_settings.get("cs_xy_ticks_font"))
     plt.tight_layout()
     # plt.xlim(0, xrange)
-    plt.legend(prop=font_settings.get("legend_font"), loc='lower right').set_zorder(11)
+    # plt.legend(prop=font_settings.get("legend_font"), loc='lower right').set_zorder(11)
     plt.grid()
     fig.set_size_inches(font_settings.get("fig_width"), font_settings.get("fig_height"))
     if save_path:
         plt.savefig(save_path)
     else:
         plt.show()
+    plot_legend_head(axes, 5, 20.6, 0.7, save_path, plot_size)
 
 
 def plot_time_acc_ablation(title, bc_ns, bc_FedAvg, ns, save_path=None, plot_size="2"):
@@ -110,20 +112,21 @@ def plot_time_acc_ablation(title, bc_ns, bc_FedAvg, ns, save_path=None, plot_siz
     axes.plot(x, ns, label="NS")
 
     axes.set_xlabel("Training Round", **font_settings.get("cs_xy_label_font"))
-    axes.set_ylabel("Average Test Accuracy (%)", **font_settings.get("cs_xy_label_font"))
+    axes.set_ylabel("Accuracy (%)", **font_settings.get("cs_xy_label_font"))
 
     plt.title(title, **font_settings.get("cs_title_font"))
     plt.xticks(**font_settings.get("cs_xy_ticks_font"))
     plt.yticks(**font_settings.get("cs_xy_ticks_font"))
     plt.tight_layout()
     # plt.xlim(0, xrange)
-    plt.legend(prop=font_settings.get("legend_font"), loc='lower right').set_zorder(11)
+    # plt.legend(prop=font_settings.get("legend_font"), loc='lower right').set_zorder(11)
     plt.grid()
     fig.set_size_inches(font_settings.get("fig_width"), font_settings.get("fig_height"))
     if save_path:
         plt.savefig(save_path)
     else:
         plt.show()
+    plot_legend_head(axes, 3, 20.6, 0.7, save_path, plot_size)
 
 
 def plot_time_acc_sensitivity(title, lr_1, lr_01, lr_001, save_path=None, plot_size="2"):
@@ -139,7 +142,7 @@ def plot_time_acc_sensitivity(title, lr_1, lr_01, lr_001, save_path=None, plot_s
     axes.plot(x, lr_001, label="lr=0.001")
 
     axes.set_xlabel("Training Round", **font_settings.get("cs_xy_label_font"))
-    axes.set_ylabel("Average Test Accuracy (%)", **font_settings.get("cs_xy_label_font"))
+    axes.set_ylabel("Accuracy (%)", **font_settings.get("cs_xy_label_font"))
 
     plt.title(title, **font_settings.get("cs_title_font"))
     plt.xticks(**font_settings.get("cs_xy_ticks_font"))
@@ -174,14 +177,44 @@ def plot_time_acc_attack(title, fed_sync_sgd, fed_ecsign, fed_efsign, fed_mvsign
     axes.plot(x, fed_avg, label="FedAvg")
 
     axes.set_xlabel("Training Round", **font_settings.get("cs_xy_label_font"))
-    axes.set_ylabel("Average Test Accuracy (%)", **font_settings.get("cs_xy_label_font"))
+    axes.set_ylabel("Accuracy (%)", **font_settings.get("cs_xy_label_font"))
 
     plt.title(title, **font_settings.get("cs_title_font"))
     plt.xticks(**font_settings.get("cs_xy_ticks_font"))
     plt.yticks(**font_settings.get("cs_xy_ticks_font"))
     plt.tight_layout()
     # plt.xlim(0, xrange)
-    plt.legend(prop=font_settings.get("legend_font"), loc='lower right').set_zorder(11)
+    # plt.legend(prop=font_settings.get("legend_font"), loc='lower right').set_zorder(11)
+    plt.grid()
+    fig.set_size_inches(font_settings.get("fig_width"), font_settings.get("fig_height"))
+    if save_path:
+        plt.savefig(save_path)
+    else:
+        plt.show()
+    plot_legend_head(axes, 8, 20.6, 0.7, save_path, plot_size)
+
+
+def plot_time_acc_fall(title, fed_sync_sgd, fed_efsign, fed_avg, save_path=None, plot_size="2"):
+    font_settings = get_font_settings(plot_size)
+    cycle_settings = get_cycle_settings()
+    x = range(1, len(fed_sync_sgd) + 1)
+
+    fig, axes = plt.subplots()
+    axes.set_prop_cycle(cycle_settings)
+
+    axes.plot(x, fed_sync_sgd, label="BEFS", linewidth=4.5, zorder=10)
+    axes.plot(x, fed_efsign, label="ARE")
+    axes.plot(x, fed_avg, label="FedAvg")
+
+    axes.set_xlabel("Training Round", **font_settings.get("cs_xy_label_font"))
+    axes.set_ylabel("Accuracy (%)", **font_settings.get("cs_xy_label_font"))
+
+    plt.title(title, **font_settings.get("cs_title_font"))
+    plt.xticks(**font_settings.get("cs_xy_ticks_font"))
+    plt.yticks(**font_settings.get("cs_xy_ticks_font"))
+    plt.tight_layout()
+    # plt.xlim(0, xrange)
+    plt.legend(prop=font_settings.get("legend_font")).set_zorder(11)
     plt.grid()
     fig.set_size_inches(font_settings.get("fig_width"), font_settings.get("fig_height"))
     if save_path:
@@ -218,7 +251,7 @@ def plot_time_bar(title, sgd, sign_sgd, save_path=None, plot_size="2"):
         plt.yticks(**font_settings.get("cs_xy_ticks_font"))
 
     fig.supxlabel("The Type of Model and Datasets", **font_settings.get("cs_xy_label_font"))
-    fig.supylabel("The Size of Gradients (MB)", **font_settings.get("cs_xy_label_font"))
+    fig.supylabel("Gradient Size (MB)", **font_settings.get("cs_xy_label_font"))
     fig.suptitle(title, **font_settings.get("cs_title_font"))
 
     plt.subplots_adjust(top=1.9)
@@ -235,30 +268,15 @@ def plot_time_bar(title, sgd, sign_sgd, save_path=None, plot_size="2"):
         plt.show()
 
 
-def plot_time_acc_fall(title, fed_sync_sgd, fed_efsign, fed_avg, save_path=None, plot_size="2"):
+def plot_legend_head(axes, legend_column, width, height, save_path=None, plot_size="3"):
     font_settings = get_font_settings(plot_size)
-    cycle_settings = get_cycle_settings()
-    x = range(1, len(fed_sync_sgd) + 1)
-
-    fig, axes = plt.subplots()
-    axes.set_prop_cycle(cycle_settings)
-
-    axes.plot(x, fed_sync_sgd, label="BEFS", linewidth=4.5, zorder=10)
-    axes.plot(x, fed_efsign, label="ARE")
-    axes.plot(x, fed_avg, label="FedAvg")
-
-    axes.set_xlabel("Training Round", **font_settings.get("cs_xy_label_font"))
-    axes.set_ylabel("Average Test Accuracy (%)", **font_settings.get("cs_xy_label_font"))
-
-    plt.title(title, **font_settings.get("cs_title_font"))
-    plt.xticks(**font_settings.get("cs_xy_ticks_font"))
-    plt.yticks(**font_settings.get("cs_xy_ticks_font"))
-    plt.tight_layout()
-    # plt.xlim(0, xrange)
-    plt.legend(prop=font_settings.get("legend_font")).set_zorder(11)
-    plt.grid()
-    fig.set_size_inches(font_settings.get("fig_width"), font_settings.get("fig_height"))
+    figlegend = pylab.figure()
+    figlegend.legend(axes.get_legend_handles_labels()[0], axes.get_legend_handles_labels()[1],
+                     prop=font_settings.get("legend_font"), ncol=legend_column, loc='upper center')
+    figlegend.tight_layout()
+    figlegend.set_size_inches(width, height)
     if save_path:
-        plt.savefig(save_path)
+        save_path = save_path[:-4] + "-legend.png"
+        figlegend.savefig(save_path)
     else:
-        plt.show()
+        figlegend.show()
