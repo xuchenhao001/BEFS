@@ -29,7 +29,7 @@ def get_font_settings(size):
         fig_width = 8
         fig_height = 4
     else:
-        font_size_dict = {"l": 25, "m": 25, "s": 25}
+        font_size_dict = {"l": 25, "m": 25, "s": 20}
         fig_width = 6.4
         fig_height = 4.8
 
@@ -67,7 +67,7 @@ def get_cycle_settings():
     return my_cycler
 
 
-def plot_time_acc(title, fed_sync_sgd, fed_efsign, fed_sign_sgd, fed_avg, local_train, save_path=None, plot_size="2"):
+def plot_time_acc(title, fed_sync_sgd, fed_efsign, fed_sign_sgd, fed_avg, local_train, in_legend=False, ex_legend=False, save_path=None, plot_size="2"):
     font_settings = get_font_settings(plot_size)
     cycle_settings = get_cycle_settings()
     x = range(1, len(fed_sync_sgd) + 1)
@@ -89,17 +89,19 @@ def plot_time_acc(title, fed_sync_sgd, fed_efsign, fed_sign_sgd, fed_avg, local_
     plt.yticks(**font_settings.get("cs_xy_ticks_font"))
     plt.tight_layout()
     # plt.xlim(0, xrange)
-    # plt.legend(prop=font_settings.get("legend_font"), loc='lower right').set_zorder(11)
+    if in_legend:
+        plt.legend(prop=font_settings.get("legend_font"), loc='lower right').set_zorder(11)
     plt.grid()
     fig.set_size_inches(font_settings.get("fig_width"), font_settings.get("fig_height"))
     if save_path:
         plt.savefig(save_path)
     else:
         plt.show()
-    plot_legend_head(axes, 5, 20.6, 0.7, save_path, plot_size)
+    if ex_legend:
+        plot_legend_head(axes, 5, 20.6, 0.7, save_path, plot_size)
 
 
-def plot_time_acc_ablation(title, bc_ns, bc_FedAvg, ns, save_path=None, plot_size="2"):
+def plot_time_acc_ablation(title, bc_ns, bc_FedAvg, ns, in_legend=False, ex_legend=False, save_path=None, plot_size="2"):
     font_settings = get_font_settings(plot_size)
     cycle_settings = get_cycle_settings()
     x = range(1, len(bc_ns) + 1)
@@ -119,14 +121,16 @@ def plot_time_acc_ablation(title, bc_ns, bc_FedAvg, ns, save_path=None, plot_siz
     plt.yticks(**font_settings.get("cs_xy_ticks_font"))
     plt.tight_layout()
     # plt.xlim(0, xrange)
-    # plt.legend(prop=font_settings.get("legend_font"), loc='lower right').set_zorder(11)
+    if in_legend:
+        plt.legend(prop=font_settings.get("legend_font"), loc='lower right').set_zorder(11)
     plt.grid()
     fig.set_size_inches(font_settings.get("fig_width"), font_settings.get("fig_height"))
     if save_path:
         plt.savefig(save_path)
     else:
         plt.show()
-    plot_legend_head(axes, 3, 20.6, 0.7, save_path, plot_size)
+    if ex_legend:
+        plot_legend_head(axes, 3, 20.6, 0.7, save_path, plot_size)
 
 
 def plot_time_acc_sensitivity(title, lr_1, lr_01, lr_001, save_path=None, plot_size="2"):
@@ -159,7 +163,7 @@ def plot_time_acc_sensitivity(title, lr_1, lr_01, lr_001, save_path=None, plot_s
 
 
 def plot_time_acc_attack(title, fed_sync_sgd, fed_ecsign, fed_efsign, fed_mvsign, fed_rlrsign, fed_avg, fed_err,
-                         fed_lfr, save_path=None, plot_size="2"):
+                         fed_lfr, in_legend=False, ex_legend=False, save_path=None, plot_size="2"):
     font_settings = get_font_settings(plot_size)
     cycle_settings = get_cycle_settings()
     x = range(1, len(fed_sync_sgd) + 1)
@@ -184,14 +188,16 @@ def plot_time_acc_attack(title, fed_sync_sgd, fed_ecsign, fed_efsign, fed_mvsign
     plt.yticks(**font_settings.get("cs_xy_ticks_font"))
     plt.tight_layout()
     # plt.xlim(0, xrange)
-    # plt.legend(prop=font_settings.get("legend_font"), loc='lower right').set_zorder(11)
+    if in_legend:
+        plt.legend(prop=font_settings.get("legend_font"), loc='lower right').set_zorder(11)
     plt.grid()
     fig.set_size_inches(font_settings.get("fig_width"), font_settings.get("fig_height"))
     if save_path:
         plt.savefig(save_path)
     else:
         plt.show()
-    plot_legend_head(axes, 8, 20.6, 0.7, save_path, plot_size)
+    if ex_legend:
+        plot_legend_head(axes, 8, 20.6, 0.7, save_path, plot_size)
 
 
 def plot_time_acc_fall(title, fed_sync_sgd, fed_efsign, fed_avg, save_path=None, plot_size="2"):

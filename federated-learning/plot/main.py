@@ -4,12 +4,12 @@ from pathlib import Path
 
 
 def plot_all():
-    experiment_names = ["cnn-cifar", "cnn-fmnist", "mlp-fmnist"]
+    sub_dir_names = ["main", "appendix"]
 
     # real_path = os.path.dirname(os.path.realpath(__file__))
     Path("./figures").mkdir(parents=True, exist_ok=True)
-    for experiment in experiment_names:
-        for path, dirs, files in os.walk("./" + experiment):
+    for sub_dir in sub_dir_names:
+        for path, dirs, files in os.walk("./" + sub_dir):
             plot_subdir = os.path.join("./figures", path)
             Path(plot_subdir).mkdir(parents=True, exist_ok=True)
             for file in files:

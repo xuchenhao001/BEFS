@@ -15,4 +15,4 @@ save_path = None
 if len(sys.argv) == 3 and sys.argv[1] and sys.argv[1] == "save":
     save_path = sys.argv[2]
 
-plot_time_acc_attack("", fed_sync_sgd, fed_ecsign, fed_efsign, fed_mvsign, fed_rlrsign, fed_avg, fed_err, fed_lfr, save_path, plot_size="3")
+plot_time_acc_attack("", fed_sync_sgd, fed_ecsign, fed_efsign, fed_mvsign, fed_rlrsign, fed_avg, fed_err, fed_lfr, False, True, save_path, plot_size="3")
