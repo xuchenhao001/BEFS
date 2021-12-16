@@ -76,7 +76,7 @@ def plot_time_acc(title, fed_sync_sgd, fed_efsign, fed_sign_sgd, fed_avg, local_
     axes.set_prop_cycle(cycle_settings)
 
     axes.plot(x, fed_sync_sgd, label="BEFS", linewidth=4.5, zorder=10)
-    axes.plot(x, fed_efsign, label="EF-signSGD")
+    axes.plot(x, fed_efsign, label="EF-SignSGD")
     axes.plot(x, fed_sign_sgd, label="SignSGD")
     axes.plot(x, fed_avg, label="FedAvg")
     axes.plot(x, local_train, label="Local")
@@ -172,10 +172,10 @@ def plot_time_acc_attack(title, fed_sync_sgd, fed_ecsign, fed_efsign, fed_mvsign
     axes.set_prop_cycle(cycle_settings)
 
     axes.plot(x, fed_sync_sgd, label="BEFS", linewidth=4.5, zorder=10)
-    axes.plot(x, fed_ecsign, label="EC-signSGD")
-    axes.plot(x, fed_efsign, label="EF-signSGD")
-    axes.plot(x, fed_mvsign, label="MV-signSGD")
-    axes.plot(x, fed_rlrsign, label="RLR-signSGD")
+    axes.plot(x, fed_ecsign, label="EC-SignSGD")
+    axes.plot(x, fed_efsign, label="EF-SignSGD")
+    axes.plot(x, fed_mvsign, label="MV-SignSGD")
+    axes.plot(x, fed_rlrsign, label="RLR-SignSGD")
     axes.plot(x, fed_err, label="ERR-FedAvg")
     axes.plot(x, fed_lfr, label="LFR-FedAvg")
     axes.plot(x, fed_avg, label="FedAvg")
