@@ -69,10 +69,10 @@ for i in range(2):
     for j in range(3):
         axs[i, j].set_prop_cycle(my_cycler)
         axs[i, j].plot(x, Data[i, j][0], label="BEFS", linewidth=4.5, zorder=10)
-        axs[i, j].plot(x, Data[i, j][1], label="EF-SignSGD")
-        axs[i, j].plot(x, Data[i, j][2], label="SignSGD")
-        axs[i, j].plot(x, Data[i, j][3], label="FedAvg")
-        axs[i, j].plot(x, Data[i, j][4], label="Local")
+        axs[i, j].plot(x, Data[i, j][1], label="FedAvg")
+        axs[i, j].plot(x, Data[i, j][2], label="EF-SignSGD")
+        axs[i, j].plot(x, Data[i, j][3], label="Local")
+        axs[i, j].plot(x, Data[i, j][4], label="SignSGD")
 
 axs[0, 0].set_title('CNN on CIFAR-10')
 axs[0, 1].set_title('CNN on FMNIST')
