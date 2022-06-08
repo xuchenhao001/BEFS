@@ -234,7 +234,8 @@ def plot_time_bar(title, sgd, sign_sgd, save_path=None, plot_size="2"):
     x = ["CNN-CIFAR10", "CNN-FMNIST", "MLP-FMNIST"]
 
     # fig, axes = plt.subplots()
-    fig, axes = plt.subplots(1, 3, tight_layout=True)
+    # fig, axes = plt.subplots(1, 3, tight_layout=True)
+    fig, axes = plt.subplots(1, 3)
 
     width = 0.15  # the width of the bars
     axes[0].bar(0 - width / 2, height=sgd[0], width=width, label="SGD",
@@ -260,13 +261,10 @@ def plot_time_bar(title, sgd, sign_sgd, save_path=None, plot_size="2"):
     fig.supylabel("Gradient Size (MB)", **font_settings.get("cs_xy_label_font"))
     fig.suptitle(title, **font_settings.get("cs_title_font"))
 
-    plt.subplots_adjust(top=1.9)
     handles, labels = axes[2].get_legend_handles_labels()
-    fig.legend(handles, labels, loc='upper center', prop=font_settings.get("legend_font"), ncol=2)
-    # fig.legend(handles, labels, prop=font_settings.get("legend_font"), ncol=2, bbox_to_anchor=(1.0, 1.05))
-    # fig.legend(handles, labels, loc='upper right', prop=font_settings.get("legend_font"))
+    fig.legend(handles, labels, bbox_to_anchor=(0.5, 1.), loc='upper center', prop=font_settings.get("legend_font"), ncol=2)
 
-    fig.tight_layout()
+    fig.tight_layout(rect=(0, 0, 1, 0.9))
     fig.set_size_inches(font_settings.get("fig_width"), font_settings.get("fig_height"))
     if save_path:
         plt.savefig(save_path)
